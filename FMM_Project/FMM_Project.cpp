@@ -1,12 +1,19 @@
-﻿#include <iostream>
-#pragma once
+﻿#pragma once
 #include <vector>
 #include <cmath>
 #include <algorithm>
 #include <complex>
+#include <iostream>
+
+#include "Factory.h"
 
 int main()
 {
+	Factory factory{ 2ull };
+
+	SortedData data{ factory.get_sources() };
+
+
     std::cout << "Hello World!\n";
 }
 /**
