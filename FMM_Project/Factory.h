@@ -27,9 +27,9 @@ struct Factory
 		}
 
 		interval_ids.push_back(0ull);
-		for (size_t i = 0; i < m; ++i)
+		for (size_t i = 0, l =0; i < m; ++i)
 		{
-			for (size_t j = 0; j < m; ++j)
+			for (size_t j = 0; j < m; ++j, ++l)
 			{
 				for (size_t q_id = 0; q_id < q_per_block; ++q_id)
 				{
@@ -44,8 +44,24 @@ struct Factory
 					q.push_back(1.0);
 				}
 				interval_ids.push_back(interval_ids.back() + q_per_block);
+				neighbors.push_back(std::vector<size_t>{});
 			}
 		}
+
+		for (size_t l = 0; l < m * m; ++l)
+		{
+			size_t i{ l / m }, j{ l % m };
+			if (i == 0)
+			{// left-most column
+				neighbors[l].push_back();
+			}
+			if (i == m - 1)
+			{//right most column
+				neighbors[l].push_back();
+			}
+		}
+
+
 	}
 
 	auto get_sources() const
@@ -53,8 +69,14 @@ struct Factory
 		return SortedData{ x,y,q,interval_ids };
 	}
 
+	auto get_neighbor_list() const
+	{
+
+	}
+
 	std::vector<double> x, y, q;
 	std::vector<size_t> interval_ids;
+	std::vector<std::vector<size_t>> neighbors;
 
 private:
 	/*auto generate_source(size_t i, size_t j)
