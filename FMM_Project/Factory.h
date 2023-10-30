@@ -35,7 +35,7 @@ struct AdjacencyFactory
 	// [cell_intervals[I]; cell_intervals[I+1]] --- contains the I-adjacent cells
 	std::vector<size_t> cell_ids, cell_intervals;
 
-	AdjacencyFactory(
+	explicit AdjacencyFactory(
 		size_t m,
 		const Domain& domain = Domain{}) :
 		domain{ domain }, m{ m },
@@ -53,8 +53,8 @@ struct AdjacencyFactory
 
 	Domain sub_domain(size_t i, size_t j) const
 	{
-		assert(i < m - 1);
-		assert(j < m - 1);
+		assert(i < m);
+		assert(j < m);
 
 		return Domain{ x_grid[i] , x_grid[i+1] , y_grid[j] , y_grid[j+1] };
 	}
@@ -68,8 +68,9 @@ protected:
 		cell_intervals.push_back(0ull);
 		for (size_t j = 0, l = 0; j < m; ++j)
 		{
-			for (size_t i = 0, count = 0; i < m; ++i, ++l)
+			for (size_t i = 0; i < m; ++i, ++l)
 			{
+				size_t count{ 0ull };
 				if (i > 0)
 				{
 					++count;
@@ -96,22 +97,23 @@ protected:
 					++count;
 					cell_ids.push_back(l - 1ul - m);
 				}
-				if (i > 0 && j < m - 1ull)
+				if (i > 0 && (j < m - 1ull))
 				{
 					++count;
 					cell_ids.push_back(l - 1ul + m);
 				}
-				if (i < m - 1ull && j > 0)
+				if ((i < m - 1ull) && j > 0)
 				{
 					++count;
-					cell_ids.push_back(l - 1ul - m);
+					cell_ids.push_back(l + 1ul - m);
 				}
-				if (i < m - 1ull && j < m - 1ull)
+				if ((i < m - 1ull) && (j < m - 1ull))
 				{
 					++count;
-					cell_ids.push_back(l - 1ul + m);
+					cell_ids.push_back(l + 1ul + m);
 				}
 
+				assert(count < 8);
 				std::sort(cell_ids.begin() + cell_intervals.back(), cell_ids.end());
 				cell_intervals.push_back(cell_intervals.back() + count);
 			}
@@ -126,13 +128,21 @@ protected:
 struct Factory
 {
 	size_t q_per_block;
+	AdjacencyFactory grid;
 
-	Factory(
+	explicit Factory(
 		const AdjacencyFactory& grid,
 		size_t q_per_block = 1ull) :
 		q_per_block{ q_per_block },
+		grid{grid},
 		rd{}
 	{
+		size_t count{ grid.m * grid.m * q_per_block };
+		x.reserve(count);
+		y.reserve(count);
+		q.reserve(count);
+		interval_ids.reserve(grid.m* grid.m + 1ull);
+
 		std::mt19937 gen(rd());
 		interval_ids.push_back(0ull);
 		for (size_t j = 0, l =0; j < grid.m; ++j)

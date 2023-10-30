@@ -9,7 +9,10 @@
 
 int main()
 {
-	Factory factory{ 2ull };
+	Domain domain{};
+	AdjacencyFactory adjfactory{2ull};
+
+	Factory factory{ adjfactory, 2ull };
 
 	SortedData data{ factory.get_sources() };
 
@@ -33,56 +36,56 @@ int main()
  * \return
  */
 
-std::vector<double> calculate(
-	const std::vector<std::complex<double>>& w,
-	//	const std::vector<double>& x, 
-	//	const std::vector<double>& y, 
-	const std::vector<double>& q,
-	size_t P,
-
-	double width, double height,
-	double Cx, double Cy,
-	size_t m
-)
-{
-	std::vector<double> out;
-	out.reserve(q.size());
-	out.push_back(1.0);
-	out.emplace_back(1.0);
-
-	//	out.resize(q.size());
-	//	out[0] = 1.0;
-
-	return out;
-}
-
-std::vector<double> calculate(
-	const std::vector<double>& x,
-	const std::vector<double>& y,
-	const std::vector<double>& q,
-	size_t P
-)
-{
-	// https://en.cppreference.com/w/cpp/algorithm/max_element
-	double width = (*std::max_element(x.begin(), x.end())) - *std::min_element(x.begin(), x.end());
-	double height = *std::max_element(y.begin(), y.end()) - *std::min_element(y.begin(), y.end());
-	double Cx = (*std::max_element(x.begin(), x.end()) + *std::min_element(x.begin(), x.end())) / 2.0;
-	double Cy{ (*std::max_element(y.begin(), y.end()) + *std::min_element(y.begin(), y.end())) / 2.0 };
-
-
-	std::vector<std::complex<double>> w;
-	for (size_t i = 0; i < x.size(); ++i)
-		w.emplace_back(x[i], y[i]);
-
-	calculate(w, q, P, width, height, Cx, Cy,
-		static_cast<size_t>(std::round(std::pow(q.size(), 2.0 / 3.0))));
-
-
-}
-
-void T_ofs();
-void T_ifo();
-void T_tfi();
+//std::vector<double> calculate(
+//	const std::vector<std::complex<double>>& w,
+//	//	const std::vector<double>& x, 
+//	//	const std::vector<double>& y, 
+//	const std::vector<double>& q,
+//	size_t P,
+//
+//	double width, double height,
+//	double Cx, double Cy,
+//	size_t m
+//)
+//{
+//	std::vector<double> out;
+//	out.reserve(q.size());
+//	out.push_back(1.0);
+//	out.emplace_back(1.0);
+//
+//	//	out.resize(q.size());
+//	//	out[0] = 1.0;
+//
+//	return out;
+//}
+//
+//std::vector<double> calculate(
+//	const std::vector<double>& x,
+//	const std::vector<double>& y,
+//	const std::vector<double>& q,
+//	size_t P
+//)
+//{
+//	// https://en.cppreference.com/w/cpp/algorithm/max_element
+//	double width = (*std::max_element(x.begin(), x.end())) - *std::min_element(x.begin(), x.end());
+//	double height = *std::max_element(y.begin(), y.end()) - *std::min_element(y.begin(), y.end());
+//	double Cx = (*std::max_element(x.begin(), x.end()) + *std::min_element(x.begin(), x.end())) / 2.0;
+//	double Cy{ (*std::max_element(y.begin(), y.end()) + *std::min_element(y.begin(), y.end())) / 2.0 };
+//
+//
+//	std::vector<std::complex<double>> w;
+//	for (size_t i = 0; i < x.size(); ++i)
+//		w.emplace_back(x[i], y[i]);
+//
+//	calculate(w, q, P, width, height, Cx, Cy,
+//		static_cast<size_t>(std::round(std::pow(q.size(), 2.0 / 3.0))));
+//
+//
+//}
+//
+//void T_ofs();
+//void T_ifo();
+//void T_tfi();
 
 //template<typename T>
 //class Vector
