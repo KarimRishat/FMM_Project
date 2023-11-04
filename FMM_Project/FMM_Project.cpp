@@ -2,6 +2,8 @@
 #include <vector>
 
 #include <iostream>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 #include "Factory.h"
 
@@ -13,6 +15,12 @@ int main()
 	Factory factory{ adjfactory, 2ull };
 
 	SortedData data{ factory.get_sources() };
+
+
+
+	using namespace Eigen;
+
+	ArrayXd zrr{ ArrayXd::Zero(10) };
 
 
     std::cout << "Hello World!\n";

@@ -11,6 +11,9 @@ struct Data
 
 	Data(const Data&) = default;
 
+
+
+
 	double x;
 	double y;
 	double q;
