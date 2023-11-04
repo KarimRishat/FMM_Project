@@ -8,7 +8,7 @@
 #include "Data.h"
 
 /**
- * @brief Descriptor of rectangular domain with point sources.
+ * @brief Descriptor of entire rectangular domain with point sources.
  */
 struct Domain
 {
@@ -18,6 +18,13 @@ struct Domain
 		x_a{ x_a }, x_b{ x_b }, y_a{ y_a }, y_b{ y_b },
 		width{ x_b - x_a }, height{ y_b - y_a }
 	{}
+};
+
+// DRY principle
+struct SubDomain :
+	public Domain
+{
+	using Domain::Domain;
 };
 
 /**
@@ -51,12 +58,12 @@ struct AdjacencyFactory
 		set_adjacent_cells();
 	}
 
-	Domain sub_domain(size_t i, size_t j) const
+	SubDomain sub_domain(size_t i, size_t j) const
 	{
 		assert(i < m);
 		assert(j < m);
 
-		return Domain{ x_grid[i] , x_grid[i+1] , y_grid[j] , y_grid[j+1] };
+		return SubDomain{ x_grid[i] , x_grid[i+1] , y_grid[j] , y_grid[j+1] };
 	}
 
 protected:
@@ -113,7 +120,8 @@ protected:
 					cell_ids.push_back(l + 1ul + m);
 				}
 
-				assert(count < 8);
+				assert(count < 9);
+				assert(count > 2);
 				std::sort(cell_ids.begin() + cell_intervals.back(), cell_ids.end());
 				cell_intervals.push_back(cell_intervals.back() + count);
 			}
@@ -121,6 +129,9 @@ protected:
 	}
 };
 
+// https://en.cppreference.com/w/cpp/numeric/random
+// https://stackoverflow.com/questions/13445688/how-to-generate-a-random-number-in-c
+// https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
 /**
  * @brief Generator of point charges within every subcell 
  * of the main domain
