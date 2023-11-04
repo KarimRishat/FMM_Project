@@ -8,7 +8,7 @@
 int main()
 {
 	Domain domain{};
-	AdjacencyFactory adjfactory{2ull};
+	AdjacencyFactory adjfactory{2ull, domain};
 
 	Factory factory{ adjfactory, 2ull };
 
