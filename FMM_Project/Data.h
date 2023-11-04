@@ -65,7 +65,7 @@ struct SortedData :
 	SortedData(
 		const UseDataType& data,
 		const std::vector<size_t>& interval_ids,
-		const std::vector<std::complex<double>>& interval_ids) :
+		const std::vector<std::complex<double>>& cell_center) :
 		UseDataType{ data },
 		interval_ids{ interval_ids },
 		cell_center{ cell_center }
@@ -78,8 +78,9 @@ struct SortedData :
 		const std::vector<double>& x,
 		const std::vector<double>& y,
 		const std::vector<double>& q,
-		const std::vector<size_t>& interval_ids) :
-		SortedData{UseDataType{ x,y,q },  interval_ids }
+		const std::vector<size_t>& interval_ids,
+		const std::vector<std::complex<double>>& cell_center) :
+		SortedData{UseDataType{ x,y,q },  interval_ids, cell_center }
 	{	}
 };
 
