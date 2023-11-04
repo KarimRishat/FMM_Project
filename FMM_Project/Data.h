@@ -59,6 +59,7 @@ struct SortedData :
 	public UseDataType
 {
 	std::vector<size_t> interval_ids;
+	std::vector<std::complex<double>> cell_center;
 
 	SortedData(
 		const UseDataType& data,
