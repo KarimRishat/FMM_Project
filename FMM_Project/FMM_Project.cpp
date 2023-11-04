@@ -1,8 +1,6 @@
 ﻿#pragma once
 #include <vector>
-#include <cmath>
-#include <algorithm>
-#include <complex>
+
 #include <iostream>
 
 #include "Factory.h"

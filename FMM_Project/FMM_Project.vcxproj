@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="Data.h" />
     <ClInclude Include="Factory.h" />
+    <ClInclude Include="Transformations.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
