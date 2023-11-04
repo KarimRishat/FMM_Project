@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <complex>
 
 
 struct Data
@@ -63,9 +64,11 @@ struct SortedData :
 
 	SortedData(
 		const UseDataType& data,
-		const std::vector<size_t>& interval_ids) :
+		const std::vector<size_t>& interval_ids,
+		const std::vector<std::complex<double>>& interval_ids) :
 		UseDataType{ data },
-		interval_ids{ interval_ids }
+		interval_ids{ interval_ids },
+		cell_center{ cell_center }
 	{	
 		if (interval_ids[0] != 0ull)
 			throw std::exception();	
