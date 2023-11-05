@@ -5,6 +5,9 @@
 #include <tuple>
 #include <random>
 
+//#include <Eigen/Core>
+//#include <Eigen/Dense>
+
 #include "Data.h"
 
 /**
@@ -41,6 +44,7 @@ struct AdjacencyFactory
 	// cell_ids --- contiguous cell ids adjacent to a cell I
 	// [cell_intervals[I]; cell_intervals[I+1]] --- contains the I-adjacent cells
 	std::vector<size_t> cell_ids, cell_intervals;
+	std::vector<std::complex<double>> cell_centers;
 
 	explicit AdjacencyFactory(
 		size_t m,
@@ -178,7 +182,7 @@ struct Factory
 
 	auto get_sources() const
 	{
-		return SortedData{ x,y,q,interval_ids };
+		return SortedData{ x,y,q,interval_ids, grid.cell_centers };
 	}
 
 	std::vector<double> x, y, q;
