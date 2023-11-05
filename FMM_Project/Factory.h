@@ -125,7 +125,7 @@ protected:
 				}
 
 				assert(count < 9);
-				assert(count > 2);
+				assert((m < 2) || (count > 2));
 				std::sort(cell_ids.begin() + cell_intervals.back(), cell_ids.end());
 				cell_intervals.push_back(cell_intervals.back() + count);
 			}
