@@ -18,14 +18,9 @@ int main()
 
 	SortedData data{ factory.get_sources() };
 
-
-
 	using namespace Eigen;
 
 	ArrayXd zrr{ ArrayXd::Zero(10) };
-
-
-    std::cout << "Hello World!\n";
 }
 /**
  * 1. Реализовать алгоритм п. 5 статьи fmm.pdf

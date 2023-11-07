@@ -2,7 +2,6 @@
 #include <vector>
 #include <complex>
 
-
 struct Data
 {
 	Data(double x, double y, double q):
@@ -10,9 +9,6 @@ struct Data
 	{}
 
 	Data(const Data&) = default;
-
-
-
 
 	double x;
 	double y;
