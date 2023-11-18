@@ -6,10 +6,11 @@
 #include <Eigen/Dense>
 
 #include "Factory.h"
+#include "Transformations.h"
 
 int main()
 {
-	Domain domain{};
+	Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 	AdjacencyFactory adjfactory{2ull, domain};
 
 	Factory factory{ adjfactory, 2ull };
@@ -18,7 +19,15 @@ int main()
 
 	using namespace Eigen;
 
-	ArrayXd zrr{ ArrayXd::Zero(10) };
+	//ArrayXd zrr{ ArrayXd::Zero(10) };
+
+	using namespace Calculate_FMM;
+
+	TranslateOperator Translate_op{ data };
+
+	VectorXcd v{ Translate_op.T_outgoing_from_source_cell(1ull, 3) };
+
+	std::cout << v;
 }
 
 

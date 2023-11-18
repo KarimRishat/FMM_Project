@@ -11,7 +11,7 @@
 namespace Calculate_FMM {
 
 	using namespace Eigen;
-	class Transform_Class {
+	class TranslateOperator {
 	private:
 		SortedData data;	//sorted field of charges
 		unsigned char P;	//the error
@@ -24,39 +24,14 @@ namespace Calculate_FMM {
 		//	return std::pair<double, double>{c_x, c_y};
 		//}
 
-
-		//makes compact representation of the sources
-		VectorXcd T_outgoing_from_source_cell(size_t cell_id) {	
-
-			size_t start_id{ data.interval_ids[cell_id] };
-			size_t end_id{ data.interval_ids[cell_id + 1ull] };
-
-			/*std::vector<std::complex<double>> q_sigma;
-			q_sigma.reserve(P);
-			std::complex<double> sum{ 0.0 };
-			for (size_t i = start_id; i < end_id; i++)
-			{
-				sum += data.q[i];
-			}
-			q_sigma.push_back(sum);*/
-			
-			//auto [x_c, y_c] {Find_centre(cell_id)};
-			//	std::complex<double> c_sigma{Find_centre(data)};
-			/*Eigen::MatrixXd T_ofs{ Eigen::MatrixXd::Zero(P, data.q.size()) };
-			Eigen::VectorXd q{ Eigen::VectorXd::Zero(data.q.size()) };*/
-
-			std::complex<double> center_sigma = data.cell_center[cell_id];
-
-			MatrixXcd T_ofs{ MatrixXd::Zero(P, end_id - start_id + 1) };
-
-			Fill_Tofs(T_ofs, start_id, end_id, center_sigma);	
-
-			VectorXcd q{ VectorXd::Zero(end_id - start_id + 1) };
-
-			Fill_sources_q(q, start_id, end_id);
-			
-			return T_ofs * q;
+		std::complex<double> Find_center(size_t start_id, size_t end_id) {
+			double c_x = ((*std::max_element(data.x.begin() + start_id, data.x.begin() + end_id))
+				+ *std::min_element(data.x.begin() + start_id, data.x.begin() + end_id)) * 0.5;
+			double c_y = ((*std::max_element(data.y.begin() + start_id, data.y.begin() + end_id))
+				+ *std::min_element(data.y.begin() + start_id, data.y.begin() + end_id)) * 0.5;
+			return std::complex<double>{c_x, c_y};
 		}
+		
 
 		//Makes the outgoing from sources translation operator
 		void Fill_Tofs(MatrixXcd& T_ofs, size_t start_id, size_t end_id, std::complex<double> center_sigma) {
@@ -71,8 +46,9 @@ namespace Calculate_FMM {
 			{
 				for (size_t Tofs_col = 0; Tofs_col < count; ++Tofs_col)
 				{
-					std::complex<double> complex_p{ (-1) * (Tofs_row - 1) / (Tofs_row) };
-					T_ofs(Tofs_row, Tofs_col) = complex_p * (data.x[Tofs_col + start_id] - center_sigma);
+					std::complex<double> complex_p{ (-1) * (double) (Tofs_row - 1) / (Tofs_row) };
+					std::complex<double> complex_coord{ data.x[Tofs_col + start_id], data.y[Tofs_col + start_id] };
+					T_ofs(Tofs_row, Tofs_col) = complex_p * (complex_coord - center_sigma);
 				}
 			}
 		}
@@ -91,18 +67,59 @@ namespace Calculate_FMM {
 
 
 	public:
-		Transform_Class(const SortedData& data) : data{ data } {};
+		TranslateOperator(const SortedData& data) : data{ data } {};
 
 
-		VectorXcd T_outgoing_from_source_field(unsigned char P)
+		/*VectorXcd T_outgoing_from_source_field(unsigned char P)
 		{
 			this->P = P;
 			for (size_t cell_id = 0; cell_id < data.interval_ids.back(); cell_id++)
 			{
 				VectorXcd q_sigma{ T_outgoing_from_source_cell(cell_id)};
 			}
+
 			
+		}*/
+
+		//makes compact representation of the sources
+		VectorXcd T_outgoing_from_source_cell(size_t cell_id, unsigned char P) {
+
+			this->P = P;
+			size_t start_id{ data.interval_ids[cell_id] };
+			size_t end_id{ data.interval_ids[cell_id + 1ull] };
+
+			/*std::vector<std::complex<double>> q_sigma;
+			q_sigma.reserve(P);
+			std::complex<double> sum{ 0.0 };
+			for (size_t i = start_id; i < end_id; i++)
+			{
+				sum += data.q[i];
+			}
+			q_sigma.push_back(sum);*/
+
+			//auto [x_c, y_c] {Find_centre(cell_id)};
+			//	std::complex<double> c_sigma{Find_centre(data)};
+			/*Eigen::MatrixXd T_ofs{ Eigen::MatrixXd::Zero(P, data.q.size()) };
+			Eigen::VectorXd q{ Eigen::VectorXd::Zero(data.q.size()) };*/
+
+
+			std::complex<double> center_sigma{ Find_center(start_id,end_id) };
+
+			//std::complex<double> center_sigma = data.cell_center[cell_id];
+
+			MatrixXcd T_ofs{ MatrixXd::Zero(P, end_id - start_id + 1) };
+
+			Fill_Tofs(T_ofs, start_id, end_id, center_sigma);
+
+			VectorXcd q{ VectorXd::Zero(end_id - start_id + 1) };
+
+			Fill_sources_q(q, start_id, end_id);
+
+			return T_ofs * q;
 		}
+
+
+
 	};
 
 }
