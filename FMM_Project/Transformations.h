@@ -14,9 +14,7 @@ namespace Calculate_FMM {
 	class Transform_Class {
 	private:
 		SortedData data;	//sorted field of charges
-		unsigned char P;	//the error incurred
-
-
+		unsigned char P;	//the error
 
 		//std::pair<double, double> Find_centre(size_t cell_id) {
 		//	size_t start_id{ data.interval_ids[cell_id] };
@@ -28,7 +26,7 @@ namespace Calculate_FMM {
 
 
 		//makes compact representation of the sources
-		VectorXcd T_outgoing_from_source(const SortedData& data, size_t cell_id) {	
+		VectorXcd T_outgoing_from_source_cell(size_t cell_id) {	
 
 			size_t start_id{ data.interval_ids[cell_id] };
 			size_t end_id{ data.interval_ids[cell_id + 1ull] };
@@ -51,7 +49,7 @@ namespace Calculate_FMM {
 
 			MatrixXcd T_ofs{ MatrixXd::Zero(P, end_id - start_id + 1) };
 
-			Fill_Tofs(T_ofs, start_id, end_id, P, center_sigma);	
+			Fill_Tofs(T_ofs, start_id, end_id, center_sigma);	
 
 			VectorXcd q{ VectorXd::Zero(end_id - start_id + 1) };
 
@@ -60,9 +58,8 @@ namespace Calculate_FMM {
 			return T_ofs * q;
 		}
 
-
 		//Makes the outgoing from sources translation operator
-		void Fill_Tofs(MatrixXcd& T_ofs, size_t start_id, size_t end_id, unsigned char P, std::complex<double> center_sigma) {
+		void Fill_Tofs(MatrixXcd& T_ofs, size_t start_id, size_t end_id, std::complex<double> center_sigma) {
 
 			size_t count = end_id - start_id + 1;
 
@@ -80,7 +77,6 @@ namespace Calculate_FMM {
 			}
 		}
 
-
 		void Fill_sources_q(VectorXcd& q_source, size_t start_id, size_t end_id) {
 			size_t count = end_id - start_id + 1;
 			for (size_t i = 0; i < count; i++)
@@ -89,12 +85,24 @@ namespace Calculate_FMM {
 			}
 		}
 
+
+
+
+
+
 	public:
 		Transform_Class(const SortedData& data) : data{ data } {};
 
 
-		//VectorXcd T_outgoing_source(const SortedData& data, unsigned char P)
-		//{}
+		VectorXcd T_outgoing_from_source_field(unsigned char P)
+		{
+			this->P = P;
+			for (size_t cell_id = 0; cell_id < data.interval_ids.back(); cell_id++)
+			{
+				VectorXcd q_sigma{ T_outgoing_from_source_cell(cell_id)};
+			}
+			
+		}
 	};
 
 }
