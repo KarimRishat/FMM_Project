@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "../FMM_Project/Factory.h"
+#include "../FMM_Project/Transformations.h"
 
 // https://learn.microsoft.com/ru-ru/visualstudio/test/how-to-use-google-test-for-cpp?view=vs-2022
 // https://github.com/google/googletest/blob/main/docs/primer.md
@@ -100,5 +101,41 @@ namespace DataGenerators
 		EXPECT_EQ(adjfactory.cell_ids[21], 6ull);
 		EXPECT_EQ(adjfactory.cell_ids[22], 7ull);
 		EXPECT_EQ(adjfactory.cell_ids[23], 8ull);
+	}
+
+
+	TEST(Tofs, SingleCharge)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		AdjacencyFactory adjfactory{ 1ull, domain };
+		Factory factory{ adjfactory, 1ull };
+
+		SortedData data{ factory.get_sources() };
+
+		size_t P = 2;
+
+		Calculate_FMM::TranslateOperator tras_op{ data, P };
+
+		EXPECT_EQ(tras_op.T_ofs(0, 0), Useddata::point_t(1.0));
+		EXPECT_EQ(tras_op.T_ofs(1, 0), -Useddata::point_t(1.0) * data.point[0] - data.cell_center(0));
+	}
+
+	TEST(Tofs, FourCellsTwoCharges)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		AdjacencyFactory adjfactory{ 2ull, domain };
+		Factory factory{ adjfactory, 2ull };
+
+		SortedData data{ factory.get_sources() };
+
+		size_t P = 5;
+
+		Calculate_FMM::TranslateOperator tras_op{ data, P };
+
+		for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
+			for (size_t p = 0; p < P; ++P)
+				// per sources in a cell
+				for (size_t source = 0; )
+					EXPECT_EQ(tras_op.T_ofs(cell_id)(p, source), -1.0 / p * std::pow(data.point[0] - data.cell_center(0), p);
 	}
 }
