@@ -44,7 +44,7 @@ struct AdjacencyFactory
 	// cell_ids --- contiguous cell ids adjacent to a cell I
 	// [cell_intervals[I]; cell_intervals[I+1]] --- contains the I-adjacent cells
 	std::vector<size_t> cell_ids, cell_intervals;
-	std::vector<std::complex<double>> cell_centers;
+	std::vector<UseDataType::point_t> cell_centers;
 
 	explicit AdjacencyFactory(
 		size_t m,
