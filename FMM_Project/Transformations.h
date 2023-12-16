@@ -2,14 +2,13 @@
 #include <complex>
 #include <cmath>
 #include <algorithm>
-//#include <Eigen/Core>
-//#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 #include "Data.h"
 
 namespace Calculate_FMM
 {
-
 	using namespace Eigen;
 	using namespace DataStructs;
 
