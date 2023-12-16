@@ -10,6 +10,8 @@
 
 #include "Data.h"
 
+using namespace DataStructs;
+
 /**
  * @brief Descriptor of entire rectangular domain with point sources.
  */
@@ -36,15 +38,16 @@ struct SubDomain :
  */
 struct AdjacencyFactory
 {
+	using point_t = Eigen::dcomplex;
 	Domain domain;
 	size_t m;
 	// m x m grid within the domain
 	std::vector<double> x_grid, y_grid;
-	// descriptor of adkacent cells
+	// descriptor of adjacent cells
 	// cell_ids --- contiguous cell ids adjacent to a cell I
 	// [cell_intervals[I]; cell_intervals[I+1]] --- contains the I-adjacent cells
 	std::vector<size_t> cell_ids, cell_intervals;
-	std::vector<UseDataType::point_t> cell_centers;
+	std::vector<point_t> cell_centers;
 
 	explicit AdjacencyFactory(
 		size_t m,

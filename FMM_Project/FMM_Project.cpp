@@ -10,24 +10,24 @@
 
 int main()
 {
-	Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-	AdjacencyFactory adjfactory{2ull, domain};
+	//Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+	//AdjacencyFactory adjfactory{2ull, domain};
 
-	Factory factory{ adjfactory, 2ull };
+	//Factory factory{ adjfactory, 2ull };
 
-	SortedData data{ factory.get_sources() };
+	//SortedData data{ factory.get_sources() };
 
-	using namespace Eigen;
+	//using namespace Eigen;
 
-	//ArrayXd zrr{ ArrayXd::Zero(10) };
+	////ArrayXd zrr{ ArrayXd::Zero(10) };
 
-	using namespace Calculate_FMM;
+	//using namespace Calculate_FMM;
 
-	TranslateOperator Translate_op{ data };
+	//TranslateOperator Translate_op{ data };
 
-	VectorXcd v{ Translate_op.T_outgoing_from_source_cell(1ull, 3) };
+	//VectorXcd v{ Translate_op.T_outgoing_from_source_cell(1ull, 3) };
 
-	std::cout << v;
+	//std::cout << v;
 }
 
 
