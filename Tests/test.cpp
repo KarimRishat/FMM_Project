@@ -6,8 +6,11 @@
 // https://github.com/google/googletest/blob/main/docs/primer.md
 // https://learn.microsoft.com/ru-ru/visualstudio/test/run-unit-tests-with-test-explorer?view=vs-2022
 
+
 namespace DataGenerators
 {
+	using point_t = Eigen::dcomplex;
+	using namespace DataStructs;
 	TEST(DomainTest, DefaualtState) {
 
 		Domain domain{};
@@ -112,12 +115,12 @@ namespace DataGenerators
 
 		SortedData data{ factory.get_sources() };
 
-		size_t P = 2;
+		unsigned char P = 2;
 
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
-		EXPECT_EQ(tras_op.T_ofs(0, 0), Useddata::point_t(1.0));
-		EXPECT_EQ(tras_op.T_ofs(1, 0), -Useddata::point_t(1.0) * data.point[0] - data.cell_center(0));
+		EXPECT_EQ(tras_op.T_ofs(0)(0,0), point_t(1.0));
+		EXPECT_EQ(tras_op.T_ofs(0)(1, 0), -point_t(1.0) * data.point[0] - data.cell_center(0));
 	}
 
 	TEST(Tofs, FourCellsTwoCharges)
@@ -128,14 +131,14 @@ namespace DataGenerators
 
 		SortedData data{ factory.get_sources() };
 
-		size_t P = 5;
+		unsigned char P = 5;
 
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
 			for (size_t p = 0; p < P; ++P)
 				// per sources in a cell
-				for (size_t source = 0; )
-					EXPECT_EQ(tras_op.T_ofs(cell_id)(p, source), -1.0 / p * std::pow(data.point[0] - data.cell_center(0), p);
+				for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+					EXPECT_EQ(tras_op.T_ofs(cell_id)(p, source), -1.0 / p * std::pow(data.point[0] - data.cell_center(0), p));
 	}
 }
