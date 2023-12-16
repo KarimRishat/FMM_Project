@@ -47,7 +47,7 @@ namespace Calculate_FMM
 
 		void Fill_T_ofs_container()
 		{
-			for (size_t cell_id = 0; cell_id < data.interval_ids.size(); cell_id++)
+			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 				{
 					T_ofs_container.middleCols
 						(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Tofs(cell_id);
@@ -70,7 +70,7 @@ namespace Calculate_FMM
 
 		TranslateOperator(const SortedData &data, unsigned char P) : data{data}, P{P}
 		{
-			T_ofs_container = MatrixXcd::Ones(P, data.interval_ids.size());
+			T_ofs_container = MatrixXcd::Ones(P, data.interval_ids.back());
 			Fill_T_ofs_container();
 		}
 
