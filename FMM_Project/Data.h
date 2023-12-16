@@ -2,16 +2,11 @@
 #include <vector>
 #include <complex>
 #include <cassert>
-//#include <Eigen/Core>
-//#include <Eigen/Dense>
-//#include "Eigen/Dense"
-#include "../Eigen/Eigen/Dense"
 
+#include <Eigen/Core>
 
 namespace DataStructs
 {
-	
-
 	struct Data
 	{
 		Data(double x, double y, double q) :

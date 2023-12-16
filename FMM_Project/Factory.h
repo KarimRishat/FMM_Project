@@ -5,8 +5,6 @@
 #include <tuple>
 #include <random>
 
-//#include <Eigen/Core>
-//#include <Eigen/Dense>
 
 #include "Data.h"
 
