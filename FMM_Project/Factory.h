@@ -62,6 +62,9 @@ struct AdjacencyFactory
 			x_grid[i] = domain.x_a + i * hx;
 			y_grid[i] = domain.y_a + i * hy;
 		}
+		for (size_t i = 0; i < m; ++i)
+			for (size_t j = 0; j < m; ++j)
+				cell_centers.emplace_back(x_grid[j] + hx / 2, y_grid[i] + hy / 2);
 		set_adjacent_cells();
 	}
 

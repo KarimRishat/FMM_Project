@@ -136,9 +136,13 @@ namespace DataGenerators
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
-			for (size_t p = 0; p < P; ++P)
-				// per sources in a cell
-				for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+			{
+				// check p == 0
+				EXPECT_EQ(tras_op.T_ofs(cell_id)(0ull, source), 1.0);
+				for (size_t p = 1; p < P; ++P)
+					// per sources in a cell
 					EXPECT_EQ(tras_op.T_ofs(cell_id)(p, source), -1.0 / p * std::pow(data.point[0] - data.cell_center(0), p));
+			}
 	}
 }
