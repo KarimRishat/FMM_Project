@@ -181,4 +181,51 @@ namespace DataGenerators
 			}
 	}
 
+
+	/*TEST(Tofs, SingleChargeMultiply)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		AdjacencyFactory adjfactory{ 1ull, domain };
+		Factory factory{ adjfactory, 1ull };
+
+		SortedData data{ factory.get_sources() };
+
+		unsigned char P = 2;
+
+		Calculate_FMM::TranslateOperator tras_op{ data, P };
+
+		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
+
+		Eigen::VectorXcd expected(1);
+
+		expected << 1.0,-1.0;
+
+		EXPECT_EQ(result, expected);
+
+	}*/
+
+
+
+
+	/*TEST(Tofs, NineCellsThreeCharges)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		AdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 3ull };
+
+		SortedData data{ factory.get_sources() };
+
+		unsigned char P = 5;
+
+		Calculate_FMM::TranslateOperator tras_op{ data, P };
+
+
+
+
+	}*/
+
+
+
+
+
 }

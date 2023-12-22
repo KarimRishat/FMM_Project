@@ -69,12 +69,22 @@ namespace Calculate_FMM
 				P, data.interval_count[cell_id]);
 		}
 
-		/*VectorXcd operator* (const MatrixXcd& T_ofs_Matrix, const VectorXcd& q_sources)
+
+
+		//q^sigma - outgoing expansion of Omega
+		VectorXcd Outgoing_expansion()
 		{
-			data
-		}*/
+			VectorXcd sources(data.q);
+			VectorXcd result(data.point.size());
+			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
+			{
+				size_t start_id{ data.interval_ids[cell_id] };
+				size_t n = data.interval_count[cell_id];
+				result.segment(start_id, n) = T_ofs(cell_id) * sources.segment(start_id, n);
+			}
+			return result;
+		}
 
 
 	};
-
 }
