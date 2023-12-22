@@ -19,6 +19,7 @@ namespace Calculate_FMM
 		SortedData data; // sorted field of charges
 		unsigned char P; // the error
 
+		//Matrix P*size(q)
 		MatrixXcd T_ofs_container;
 		 
 		
@@ -43,7 +44,7 @@ namespace Calculate_FMM
 		}
 
 
-
+		// Makes the T_ofs operators for all cells in field
 		void Fill_T_ofs_container()
 		{
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
@@ -52,18 +53,6 @@ namespace Calculate_FMM
 						(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Tofs(cell_id);
 				}
 		}
-
-
-		// void Fill_sources_q(VectorXd& q_source, size_t start_id, size_t end_id)
-		//{
-		////	auto q_sources_temp{ data.cell_sources(cell_id) };
-
-		//	size_t count = end_id - start_id + 1;
-		//	for (size_t i = 0; i < count; i++)
-		//	{
-		//		q_source(i) = data.q[start_id + i];
-		//	}
-		//}
 
 	public:
 
@@ -80,31 +69,12 @@ namespace Calculate_FMM
 				P, data.interval_count[cell_id]);
 		}
 
-		// VectorXcd T_outgoing_from_source_field()
-		//{
-		//	for (size_t cell_id = 0; cell_id < data.interval_ids.back(); cell_id++)
-		//	{
-		//		VectorXcd q_sigma{ T_outgoing_from_source_cell(cell_id)};
-		//	}
+		/*VectorXcd operator* (const MatrixXcd& T_ofs_Matrix, const VectorXcd& q_sources)
+		{
+			data
+		}*/
 
-		//
-		//}
 
-		// makes compact representation of the sources
-		//VectorXcd T_outgoing_from_source_cell(size_t cell_id)
-		//{
-
-		//	size_t start_id{data.interval_ids[cell_id]};
-		//	size_t end_id{data.interval_ids[cell_id + 1ull]};
-
-		//	/*point_t center_sigma{data.cell_center(cell_id)};*/
-
-		//	MatrixXcd T_ofs{MatrixXcd::Zero(P, end_id - start_id)};
-
-		//	Fill_Tofs(T_ofs, cell_id);
-
-		//	return T_ofs(cell_id) * data.cell_sources(cell_id);
-		//}
 	};
 
 }
