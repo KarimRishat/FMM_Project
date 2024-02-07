@@ -121,7 +121,7 @@ namespace DataGenerators
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		EXPECT_EQ(tras_op.T_ofs(0)(0,0), point_t(1.0));
-		EXPECT_EQ(tras_op.T_ofs(0)(1, 0), -point_t(1.0) * data.point[0] - data.cell_center(0));
+		EXPECT_EQ(tras_op.T_ofs(0)(1, 0), -point_t(1.0) * (data.point[0] - data.cell_center(0)));
 	}
 
 	TEST(Tofs, FourCellsTwoCharges)
@@ -137,6 +137,7 @@ namespace DataGenerators
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
+		{
 			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
 			{
 				size_t start_id{ data.interval_ids[cell_id] };
@@ -151,6 +152,7 @@ namespace DataGenerators
 					EXPECT_NEAR(result.imag(), expected.imag(), EPS);
 				}
 			}
+		}
 	}
 
 
@@ -167,6 +169,7 @@ namespace DataGenerators
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
+		{
 			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
 			{
 				size_t start_id{ data.interval_ids[cell_id] };
@@ -179,10 +182,11 @@ namespace DataGenerators
 					EXPECT_NEAR(result.imag(), expected.imag(), EPS);
 				}
 			}
+		}
 	}
 
 
-	TEST(Tofs, Multiply_single)
+	TEST(TofsMultiply, SingleCharge)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		AdjacencyFactory adjfactory{ 1ull, domain };
@@ -192,22 +196,18 @@ namespace DataGenerators
 
 		unsigned char P = 2;
 
-		/*Calculate_FMM::TranslateOperator tras_op{ data, P };
+		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
 
-		Eigen::VectorXcd expected(1);
-
-		expected << 1.0,-1.0;
-
-		EXPECT_EQ(result, expected);*/
-
+		EXPECT_EQ(result(0), point_t(1.0));
+		EXPECT_EQ(result(1), -point_t(1.0) * (data.point[0] - data.cell_center(0)) * 1.0);
 	}
 
 
 
 
-	TEST(Tofs, NineCellsThreeCharges_multiply)
+	TEST(TofsMultiply, NineCellsThreeCharges)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		AdjacencyFactory adjfactory{ 3ull, domain };
@@ -220,6 +220,22 @@ namespace DataGenerators
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
+
+		/*for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
+		{
+			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+			{
+				size_t start_id{ data.interval_ids[cell_id] };
+				EXPECT_EQ(tras_op.T_ofs(cell_id)(0ull, source), 1.0);
+				for (size_t p = 1; p < P; ++p)
+				{
+					auto result = tras_op.T_ofs(cell_id)(p, source);
+					auto expected = -1.0 / p * std::pow(data.point[start_id + source] - data.cell_center(cell_id), p);
+					EXPECT_NEAR(result.real(), expected.real(), EPS);
+					EXPECT_NEAR(result.imag(), expected.imag(), EPS);
+				}
+			}
+		}*/
 
 
 	}

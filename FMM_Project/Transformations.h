@@ -78,14 +78,15 @@ namespace Calculate_FMM
 		{
 			Map<VectorXd> sources(data.q.data(), data.q.size());
 
-			VectorXcd result(data.point.size() * P);
+			VectorXcd result(data.interval_count.size() * P);
 
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 			{
 				size_t start_id{ data.interval_ids[cell_id] };
 				size_t n = data.interval_count[cell_id];
-				result.block(start_id, 0, P, 1) = T_ofs(cell_id) * sources.segment(start_id, n);
+				result.block(cell_id * P, 0, P, 1) = T_ofs(cell_id) * sources.segment(start_id, n);
 			}
+			std::cout << result;
 			return result;
 		}
 
