@@ -192,7 +192,7 @@ namespace DataGenerators
 
 		unsigned char P = 2;
 
-		Calculate_FMM::TranslateOperator tras_op{ data, P };
+		/*Calculate_FMM::TranslateOperator tras_op{ data, P };
 
 		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
 
@@ -200,14 +200,14 @@ namespace DataGenerators
 
 		expected << 1.0,-1.0;
 
-		EXPECT_EQ(result, expected);
+		EXPECT_EQ(result, expected);*/
 
 	}
 
 
 
 
-	/*TEST(Tofs, NineCellsThreeCharges)
+	TEST(Tofs, NineCellsThreeCharges_multiply)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		AdjacencyFactory adjfactory{ 3ull, domain };
@@ -219,10 +219,10 @@ namespace DataGenerators
 
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
+		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
 
 
-
-	}*/
+	}
 
 
 

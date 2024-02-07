@@ -77,13 +77,14 @@ namespace Calculate_FMM
 		VectorXcd Outgoing_expansion()
 		{
 			Map<VectorXd> sources(data.q.data(), data.q.size());
-			VectorXcd result(data.point.size());
+
+			VectorXcd result(data.point.size() * P);
+
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 			{
 				size_t start_id{ data.interval_ids[cell_id] };
 				size_t n = data.interval_count[cell_id];
-				/*result.segment(start_id, n) = sources.segment(start_id, n)*T_ofs(cell_id);*/
-				std::cout<< T_ofs(cell_id)* sources.segment(start_id, n) ;
+				result.block(start_id, 0, P, 1) = T_ofs(cell_id) * sources.segment(start_id, n);
 			}
 			return result;
 		}
