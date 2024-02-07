@@ -72,15 +72,18 @@ namespace Calculate_FMM
 
 
 		//q^sigma - outgoing expansion of Omega
+
+
 		VectorXcd Outgoing_expansion()
 		{
-			VectorXcd sources(data.q);
+			Map<VectorXd> sources(data.q.data(), data.q.size());
 			VectorXcd result(data.point.size());
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 			{
 				size_t start_id{ data.interval_ids[cell_id] };
 				size_t n = data.interval_count[cell_id];
-				result.segment(start_id, n) = T_ofs(cell_id) * sources.segment(start_id, n);
+				/*result.segment(start_id, n) = sources.segment(start_id, n)*T_ofs(cell_id);*/
+				std::cout<< T_ofs(cell_id)* sources.segment(start_id, n) ;
 			}
 			return result;
 		}

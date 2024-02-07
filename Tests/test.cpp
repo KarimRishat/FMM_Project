@@ -182,7 +182,7 @@ namespace DataGenerators
 	}
 
 
-	/*TEST(Tofs, SingleChargeMultiply)
+	TEST(Tofs, Multiply_single)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		AdjacencyFactory adjfactory{ 1ull, domain };
@@ -202,7 +202,7 @@ namespace DataGenerators
 
 		EXPECT_EQ(result, expected);
 
-	}*/
+	}
 
 
 
