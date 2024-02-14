@@ -207,7 +207,7 @@ namespace DataGenerators
 
 
 
-	TEST(TofsMultiply, NineCellsThreeCharges)
+	TEST(TofsMultiply, NineCellsThreeChargesFiveP)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		AdjacencyFactory adjfactory{ 3ull, domain };
@@ -221,23 +221,54 @@ namespace DataGenerators
 
 		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
 
-		/*for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
+		Eigen::VectorXcd expected(P * data.its_cell_center.size());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+		for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
 		{
+			size_t start_id{ data.interval_ids[cell_id] };
 			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
 			{
-				size_t start_id{ data.interval_ids[cell_id] };
-				EXPECT_EQ(tras_op.T_ofs(cell_id)(0ull, source), 1.0);
-				for (size_t p = 1; p < P; ++p)
+				expected(cell_id * P) += data.q[start_id + source];
+			}
+			for(size_t p = 1; p < P; ++p)
+			{
+				for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
 				{
-					auto result = tras_op.T_ofs(cell_id)(p, source);
-					auto expected = -1.0 / p * std::pow(data.point[start_id + source] - data.cell_center(cell_id), p);
-					EXPECT_NEAR(result.real(), expected.real(), EPS);
-					EXPECT_NEAR(result.imag(), expected.imag(), EPS);
+					expected(cell_id * P + p) += -1.0 / p *
+						std::pow(data.point[start_id + source] - data.cell_center(cell_id), p) * data.q[start_id+source];
 				}
 			}
-		}*/
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+
+	}
 
 
+
+	TEST(TofsMultiply, FiveChargesInOneCellTwoP)
+	{
+		const std::vector<double>& x{ 4,1,-1,-1,-2 };
+		const std::vector<double>& y{ 2,1,1,-2,2 };
+		const std::vector<double>& q{ 1,3,2,-2,-1 };
+		SortedData data{ x,y,q,std::vector<size_t>{ 0,5},std::vector <point_t>{} };
+
+		unsigned char P = 2;
+
+		Calculate_FMM::TranslateOperator tras_op{ data, P };
+
+		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
+
+		EXPECT_EQ(result(0), point_t(3.0));
+		EXPECT_EQ(result(1), -point_t(6.0,9.0));
 	}
 
 
