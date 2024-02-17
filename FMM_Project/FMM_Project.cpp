@@ -6,20 +6,59 @@
 #include <Eigen/Dense>
 
 #include "Factory.h"
+#include "Transformations.h"
 
 int main()
 {
-	Domain domain{};
-	AdjacencyFactory adjfactory{2ull, domain};
+	//Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+	//AdjacencyFactory adjfactory{2ull, domain};
 
-	Factory factory{ adjfactory, 2ull };
+	//Factory factory{ adjfactory, 2ull };
 
-	SortedData data{ factory.get_sources() };
+	//SortedData data{ factory.get_sources() };
 
-	using namespace Eigen;
+	//using namespace Eigen;
 
-	ArrayXd zrr{ ArrayXd::Zero(10) };
+	////ArrayXd zrr{ ArrayXd::Zero(10) };
+
+	//using namespace Calculate_FMM;
+
+	//TranslateOperator Translate_op{ data };
+
+	//VectorXcd v{ Translate_op.T_outgoing_from_source_cell(1ull, 3) };
+
+	//std::cout << v;
+
+	//Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+	//AdjacencyFactory adjfactory{ 2ull, domain };
+	//Factory factory{ adjfactory, 2ull };
+
+	//SortedData data{ factory.get_sources() };
+
+	//unsigned char P = 5;
+
+	//Calculate_FMM::TranslateOperator tras_op{ data, P };
+
+	//for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
+	//	for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+	//	{
+	//		// check p == 0
+	//	//	EXPECT_EQ(tras_op.T_ofs(cell_id)(0ull, source), 1.0);
+	//		for (size_t p = 1; p < P; ++P)
+	//			// per sources in a cell
+	//	//		EXPECT_EQ(tras_op.T_ofs(cell_id)(p, source), -1.0 / p * std::pow(data.point[0] - data.cell_center(0), p));
+	//		{
+	//		}
+	//	}
+
+
 }
+
+
+
+
+
+
 /**
  * 1. Реализовать алгоритм п. 5 статьи fmm.pdf
  * 2. Для двумерного случая

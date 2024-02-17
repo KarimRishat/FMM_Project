@@ -5,10 +5,10 @@
 #include <tuple>
 #include <random>
 
-//#include <Eigen/Core>
-//#include <Eigen/Dense>
 
 #include "Data.h"
+
+using namespace DataStructs;
 
 /**
  * @brief Descriptor of entire rectangular domain with point sources.
@@ -36,15 +36,16 @@ struct SubDomain :
  */
 struct AdjacencyFactory
 {
+	using point_t = Eigen::dcomplex;
 	Domain domain;
 	size_t m;
 	// m x m grid within the domain
 	std::vector<double> x_grid, y_grid;
-	// descriptor of adkacent cells
+	// descriptor of adjacent cells
 	// cell_ids --- contiguous cell ids adjacent to a cell I
 	// [cell_intervals[I]; cell_intervals[I+1]] --- contains the I-adjacent cells
 	std::vector<size_t> cell_ids, cell_intervals;
-	std::vector<std::complex<double>> cell_centers;
+	std::vector<point_t> cell_centers;
 
 	explicit AdjacencyFactory(
 		size_t m,
@@ -59,6 +60,9 @@ struct AdjacencyFactory
 			x_grid[i] = domain.x_a + i * hx;
 			y_grid[i] = domain.y_a + i * hy;
 		}
+		for (size_t i = 0; i < m; ++i)
+			for (size_t j = 0; j < m; ++j)
+				cell_centers.emplace_back(x_grid[j] + hx / 2, y_grid[i] + hy / 2);
 		set_adjacent_cells();
 	}
 
