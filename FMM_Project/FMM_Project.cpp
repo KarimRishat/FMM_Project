@@ -51,6 +51,7 @@ int main()
 	//		}
 	//	}
 
+	using namespace Eigen;
 
 }
 
