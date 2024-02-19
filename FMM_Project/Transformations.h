@@ -21,6 +21,9 @@ namespace Calculate_FMM
 
 		//Matrix P*size(q)
 		MatrixXcd T_ofs_container;
+
+		//Matrix P*P
+		MatrixXcd T_ifo_container;
 		 
 		
 		// Makes the outgoing from sources translation operator for cell
@@ -48,10 +51,10 @@ namespace Calculate_FMM
 		void Fill_T_ofs_container()
 		{
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
-				{
-					T_ofs_container.middleCols
-						(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Tofs(cell_id);
-				}
+			{
+				T_ofs_container.middleCols
+					(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Tofs(cell_id);
+			}
 		}
 
 	public:
@@ -88,6 +91,69 @@ namespace Calculate_FMM
 			}
 			return result;
 		}
+
+
+		// Makes the T_ifo operators for all cells in field
+		void Fill_T_ifo_container()
+		{
+			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
+			{
+				size_t count_far 
+				for (size_t far_cell_id = 0; far_cell_id < length; far_cell_id++)
+				{
+					T_ifo_container.middleCols
+					(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Tifo(cell_id, );
+				}
+			}
+		}
+
+		// Makes the incoming from outgoing translation operator for cell
+		MatrixXcd Fill_Tifo(size_t target_id, size_t source_id)
+		{
+			//c_sigma - c_tau
+			point_t c_delta = data.cell_center(source_id) - data.cell_center(target_id);
+
+			MatrixXcd T_ifo(P, P);
+
+			T_ifo(0, 0) = std::log(-c_delta);
+
+			T_ifo(0, 1) = (-1.0) / c_delta;
+
+			T_ifo(1, 0) = T_ifo(0, 1);
+
+			T_ifo(1, 1) = T_ifo(0, 1);
+
+			//First 2 rows
+			for (size_t j = 2; j < P; j++)
+			{
+				T_ifo(0, j) = (-1.0) * T_ifo(0, j - 1) / c_delta;
+				T_ifo(1, j) = (point_t)(j / (j - 1)) * (-1.0) * T_ifo(1, j - 1) / c_delta;
+			}
+
+			for (size_t p = 2; p < P; p++)
+			{
+
+				T_ifo(p, 0) = (point_t)((p - 1) / p) * T_ifo(p - 1, 0) / c_delta;
+				T_ifo(p, 1) = T_ifo(p - 1, 1) / c_delta;
+
+				for (size_t j = 2; j < P; j++)
+				{
+					T_ifo(p, j) = (-1.0) * (point_t)((p + j - 1) / (j - 1)) * T_ifo(p, j - 1) / c_delta;
+				}
+			}
+
+			return T_ifo;
+
+		}
+
+		VectorXcd Incoming_expansion()
+		{
+			VectorXcd result(data.interval_count.size() * P);
+
+
+
+		}
+
 
 
 	};
