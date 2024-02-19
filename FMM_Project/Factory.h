@@ -145,9 +145,11 @@ protected:
  * of the main domain
  */
 struct Factory
+	//:public GridFactory
 {
 	size_t q_per_block;
-	AdjacencyFactory grid;
+	AdjacencyFactory grid;//AdjCellsFactory
+	//FarCellsFactory
 
 	explicit Factory(
 		const AdjacencyFactory& grid,
@@ -165,6 +167,39 @@ struct Factory
 		std::mt19937 gen(rd());
 		interval_ids.push_back(0ull);
 		for (size_t j = 0, l =0; j < grid.m; ++j)
+		{
+			for (size_t i = 0; i < grid.m; ++i, ++l)
+			{
+				// for every subdomain of the main domain
+				// generate a set of point charges
+				auto domain{ grid.sub_domain(i,j) };
+				std::uniform_real_distribution<> uniform_x(domain.x_a, domain.x_b);
+				std::uniform_real_distribution<> uniform_y(domain.y_a, domain.y_b);
+				for (size_t q_id = 0; q_id < q_per_block; ++q_id)
+				{
+					x.push_back(uniform_x(gen));
+					y.push_back(uniform_y(gen));
+					q.push_back(1.0);
+				}
+				interval_ids.push_back(interval_ids.back() + q_per_block);
+			}
+		}
+
+
+	}
+
+
+	virtual void set_data()
+	{
+		size_t count{ grid.m * grid.m * q_per_block };
+		x.reserve(count);
+		y.reserve(count);
+		q.reserve(count);
+		interval_ids.reserve(grid.m * grid.m + 1ull);
+
+		std::mt19937 gen(rd());
+		interval_ids.push_back(0ull);
+		for (size_t j = 0, l = 0; j < grid.m; ++j)
 		{
 			for (size_t i = 0; i < grid.m; ++i, ++l)
 			{

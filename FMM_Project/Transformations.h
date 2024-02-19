@@ -12,18 +12,17 @@ namespace Calculate_FMM
 	using namespace Eigen;
 	using namespace DataStructs;
 
+	using point_t = Eigen::dcomplex;
+
 	class TranslateOperator
 	{
-		using point_t = Eigen::dcomplex;
+		
 	private:
 		SortedData data; // sorted field of charges
 		unsigned char P; // the error
 
 		//Matrix P*size(q)
 		MatrixXcd T_ofs_container;
-
-		//Matrix P*P
-		MatrixXcd T_ifo_container;
 		 
 		
 		// Makes the outgoing from sources translation operator for cell
@@ -93,13 +92,31 @@ namespace Calculate_FMM
 		}
 
 
+		
+
+	};
+
+
+	class Incoming_tanslate_operator
+	{
+
+		//Matrix P*P
+		MatrixXcd T_ifo_container;
+
+
+
+
+
+
+
+
 		// Makes the T_ifo operators for all cells in field
 		void Fill_T_ifo_container()
 		{
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 			{
-				size_t count_far 
-				for (size_t far_cell_id = 0; far_cell_id < length; far_cell_id++)
+				size_t count_far;
+				for (size_t far_cell_id = 0; far_cell_id < count_far; far_cell_id++)
 				{
 					T_ifo_container.middleCols
 					(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Tifo(cell_id, );
@@ -153,8 +170,8 @@ namespace Calculate_FMM
 
 
 		}
-
-
-
 	};
+
+
+
 }
