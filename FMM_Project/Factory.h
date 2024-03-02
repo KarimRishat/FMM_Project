@@ -63,37 +63,13 @@ struct GridFactory
 };
 
 
-
-struct BigAdjacencyFactory:
-	public GridFactory
-{
-	using point_t = Eigen::dcomplex;
-	std::vector<point_t> cell_centers;
-	struct AdjacencyFactory adjacency_factory;
-	struct FarFactory far_factory;
-
-	explicit BigAdjacencyFactory(
-		size_t m,
-		const Domain& domain = Domain{}) :
-		GridFactory(m, domain),
-		adjacency_factory{m},
-		far_factory{m}
-	{
-		double hx{ domain.width / m }, hy{ domain.height / m };
-		for (size_t i = 0; i < m; ++i)
-			for (size_t j = 0; j < m; ++j)
-				cell_centers.emplace_back(x_grid[j] + hx / 2, y_grid[i] + hy / 2);
-	}
-
-};
-
 struct AdjacencyFactory
 {
 	std::vector<size_t> cell_ids;
 	std::vector<size_t> cell_intervals;
 	size_t m;
 
-	explicit AdjacencyFactory(size_t m = 1) : m{m}
+	explicit AdjacencyFactory(size_t m = 1) : m{ m }
 	{
 		set_adjacent_cells();
 	}
@@ -166,7 +142,7 @@ struct FarFactory
 	std::vector<size_t> cell_ids;
 	std::vector<size_t> cell_intervals;
 	size_t m;
-	explicit FarFactory(size_t m) : m{ m } 
+	explicit FarFactory(size_t m) : m{ m }
 	{
 		set_far_cells();
 	}
@@ -176,7 +152,7 @@ protected:
 	{
 		cell_intervals.reserve(m * m + 1);
 		size_t area = m * m;
-		cell_ids.reserve((area - 9) * (m - 2) * (m - 2) 
+		cell_ids.reserve((area - 9) * (m - 2) * (m - 2)
 			+ 4 * (area - 4) + (area - 6) * (m - 2) * 4);
 
 		cell_intervals.push_back(0ull);
@@ -187,9 +163,9 @@ protected:
 		{
 			for (size_t col = 0; col < m; ++col)
 			{
-				count = 0;
+				count = 0ull;
 				//Все дальние клетки справа на этой линии
-				if (col < m - 2)
+				if (m > 2 && col < m - 2)
 				{
 					for (size_t line = col + 2; line < m; ++line)
 					{
@@ -199,7 +175,7 @@ protected:
 				}
 
 				//Все дальние клетки справа на линии ниже
-				if (row < m - 1 && col < m - 2)
+				if (m > 2 && row < m - 1 && col < m - 2)
 				{
 					for (size_t line = col + 2; line < m; ++line)
 					{
@@ -209,7 +185,7 @@ protected:
 				}
 
 				//Все дальние клетки справа на линии выше
-				if (row >  1 && col < m - 2)
+				if (m > 2 && row > 0 && col < m - 2)
 				{
 					for (size_t line = col + 2; line < m; ++line)
 					{
@@ -240,7 +216,7 @@ protected:
 				}
 
 				//Все дальние клетки слева на верхней линии
-				if (row > 1 && col > 1)
+				if (row > 0 && col > 1)
 				{
 					for (size_t line = 0; line < col - 1; ++line)
 					{
@@ -263,7 +239,7 @@ protected:
 				}
 
 				//Все клетки выше
-				if (row < m - 2)
+				if (m > 2 && row < m - 2)
 				{
 					for (size_t local_row = row + 2; local_row < m; ++local_row)
 					{
@@ -274,7 +250,7 @@ protected:
 					}
 					count += (m * (m - row - 2));
 				}
-				
+
 				std::sort(cell_ids.begin() + cell_intervals.back(), cell_ids.end());
 				cell_intervals.push_back(cell_intervals.back() + count);
 
@@ -282,6 +258,32 @@ protected:
 		}
 	}
 };
+
+
+struct BigAdjacencyFactory:
+	public GridFactory
+{
+	using point_t = Eigen::dcomplex;
+	std::vector<point_t> cell_centers;
+	struct AdjacencyFactory adjacency_factory;
+	struct FarFactory far_factory;
+
+	explicit BigAdjacencyFactory(
+		size_t m,
+		const Domain& domain = Domain{}) :
+		GridFactory(m, domain),
+		adjacency_factory{m},
+		far_factory{m}
+	{
+		double hx{ domain.width / m }, hy{ domain.height / m };
+		for (size_t i = 0; i < m; ++i)
+			for (size_t j = 0; j < m; ++j)
+				cell_centers.emplace_back(x_grid[j] + hx / 2, y_grid[i] + hy / 2);
+	}
+
+};
+
+
 
 /**
  * @brief Factory that introduces a grid on the domain

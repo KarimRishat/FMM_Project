@@ -12,7 +12,7 @@ namespace DataGenerators
 {
 	using point_t = Eigen::dcomplex;
 	using namespace DataStructs;
-	TEST(DomainTest, DefaualtState) {
+	TEST(DomainTest, DefaultState) {
 
 		Domain domain{};
 
@@ -26,92 +26,163 @@ namespace DataGenerators
 
 	TEST(AdjacencyTest, NoDivision) {
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 1ull, domain };
+		BigAdjacencyFactory adjfactory{ 1ull, domain };
 
 		EXPECT_EQ(adjfactory.x_grid[0], -1.0);
 		EXPECT_EQ(adjfactory.x_grid[1], 1.0);
 		EXPECT_EQ(adjfactory.y_grid[0], -1.0);
 		EXPECT_EQ(adjfactory.y_grid[1], 1.0);
-		EXPECT_EQ(adjfactory.cell_ids.size(), 0ull);
-		EXPECT_EQ(adjfactory.cell_intervals.front(), 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids.size(), 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_intervals.front(), 0ull);
 
-		EXPECT_EQ(adjfactory.cell_intervals.back(), adjfactory.cell_ids.size());
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_intervals.back(), adjfactory.adjacency_factory.cell_ids.size());
 	}
+
 
 	TEST(AdjacencyTest, DivideByTwo) {
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 2ull, domain };
+		BigAdjacencyFactory adjfactory{ 2ull, domain };
 
 		EXPECT_EQ(adjfactory.x_grid.front(), -1.0);
 		EXPECT_EQ(adjfactory.x_grid.back(), 1.0);
 		EXPECT_EQ(adjfactory.y_grid.front(), -1.0);
 		EXPECT_EQ(adjfactory.y_grid.back(), 1.0);
-		EXPECT_EQ(adjfactory.cell_ids.size(), 12ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids.size(), 12ull);
 
-		EXPECT_EQ(adjfactory.cell_intervals.back(), adjfactory.cell_ids.size());
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_intervals.back(), adjfactory.adjacency_factory.cell_ids.size());
 
-		for (size_t id = 0ull; id < adjfactory.cell_intervals.size(); ++id)
-			EXPECT_EQ(adjfactory.cell_intervals[id], id * 3ull);
+		for (size_t id = 0ull; id < adjfactory.adjacency_factory.cell_intervals.size(); ++id)
+			EXPECT_EQ(adjfactory.adjacency_factory.cell_intervals[id], id * 3ull);
 
-		EXPECT_EQ(adjfactory.cell_ids[0], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[1], 2ull);
-		EXPECT_EQ(adjfactory.cell_ids[2], 3ull);
-		EXPECT_EQ(adjfactory.cell_ids[3], 0ull);
-		EXPECT_EQ(adjfactory.cell_ids[4], 2ull);
-		EXPECT_EQ(adjfactory.cell_ids[5], 3ull);
-		EXPECT_EQ(adjfactory.cell_ids[6], 0ull);
-		EXPECT_EQ(adjfactory.cell_ids[7], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[8], 3ull);
-		EXPECT_EQ(adjfactory.cell_ids[9], 0ull);
-		EXPECT_EQ(adjfactory.cell_ids[10], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[11], 2ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[0], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[1], 2ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[2], 3ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[3], 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[4], 2ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[5], 3ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[6], 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[7], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[8], 3ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[9], 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[10], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[11], 2ull);
 	}
 
 	TEST(AdjacencyTest, DivideByThree) {
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 3ull, domain };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
 
 		EXPECT_EQ(adjfactory.x_grid.front(), -1.0);
 		EXPECT_EQ(adjfactory.x_grid.back(), 1.0);
 		EXPECT_EQ(adjfactory.y_grid.front(), -1.0);
 		EXPECT_EQ(adjfactory.y_grid.back(), 1.0);
-		EXPECT_EQ(adjfactory.cell_ids.size(), 40ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids.size(), 40ull);
 
-		EXPECT_EQ(adjfactory.cell_intervals.back(), adjfactory.cell_ids.size());
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_intervals.back(), adjfactory.adjacency_factory.cell_ids.size());
 
 
-		EXPECT_EQ(adjfactory.cell_ids[0], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[1], 3ull);
-		EXPECT_EQ(adjfactory.cell_ids[2], 4ull);
-		EXPECT_EQ(adjfactory.cell_ids[3], 0ull);
-		EXPECT_EQ(adjfactory.cell_ids[4], 2ull);
-		EXPECT_EQ(adjfactory.cell_ids[5], 3ull);
-		EXPECT_EQ(adjfactory.cell_ids[6], 4ull);
-		EXPECT_EQ(adjfactory.cell_ids[7], 5ull);
-		EXPECT_EQ(adjfactory.cell_ids[8], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[9], 4ull);
-		EXPECT_EQ(adjfactory.cell_ids[10], 5ull);
-		EXPECT_EQ(adjfactory.cell_ids[11], 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[0], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[1], 3ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[2], 4ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[3], 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[4], 2ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[5], 3ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[6], 4ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[7], 5ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[8], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[9], 4ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[10], 5ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[11], 0ull);
 
-		EXPECT_EQ(adjfactory.cell_ids[12], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[13], 4ull);
-		EXPECT_EQ(adjfactory.cell_ids[14], 6ull);
-		EXPECT_EQ(adjfactory.cell_ids[15], 7ull);
-		EXPECT_EQ(adjfactory.cell_ids[16], 0ull);
-		EXPECT_EQ(adjfactory.cell_ids[17], 1ull);
-		EXPECT_EQ(adjfactory.cell_ids[18], 2ull);
-		EXPECT_EQ(adjfactory.cell_ids[19], 3ull);
-		EXPECT_EQ(adjfactory.cell_ids[20], 5ull);
-		EXPECT_EQ(adjfactory.cell_ids[21], 6ull);
-		EXPECT_EQ(adjfactory.cell_ids[22], 7ull);
-		EXPECT_EQ(adjfactory.cell_ids[23], 8ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[12], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[13], 4ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[14], 6ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[15], 7ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[16], 0ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[17], 1ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[18], 2ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[19], 3ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[20], 5ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[21], 6ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[22], 7ull);
+		EXPECT_EQ(adjfactory.adjacency_factory.cell_ids[23], 8ull);
 	}
+
+
+	TEST(FarCellsTest, NoDivision) {
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 1ull, domain };
+
+		EXPECT_EQ(adjfactory.x_grid[0], -1.0);
+		EXPECT_EQ(adjfactory.x_grid[1], 1.0);
+		EXPECT_EQ(adjfactory.y_grid[0], -1.0);
+		EXPECT_EQ(adjfactory.y_grid[1], 1.0);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids.size(), 0ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_intervals.front(), 0ull);
+
+		EXPECT_EQ(adjfactory.far_factory.cell_intervals.back(), adjfactory.far_factory.cell_ids.size());
+	}
+
+
+	TEST(FarCellsTest, DivideByTwo) {
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 2ull, domain };
+
+		EXPECT_EQ(adjfactory.x_grid.front(), -1.0);
+		EXPECT_EQ(adjfactory.x_grid.back(), 1.0);
+		EXPECT_EQ(adjfactory.y_grid.front(), -1.0);
+		EXPECT_EQ(adjfactory.y_grid.back(), 1.0);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids.size(), 0ull);
+
+		EXPECT_EQ(adjfactory.far_factory.cell_intervals.back(), adjfactory.far_factory.cell_ids.size());
+	}
+
+
+	TEST(FarCellsTest, DivideByThree) {
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+
+		EXPECT_EQ(adjfactory.x_grid.front(), -1.0);
+		EXPECT_EQ(adjfactory.x_grid.back(), 1.0);
+		EXPECT_EQ(adjfactory.y_grid.front(), -1.0);
+		EXPECT_EQ(adjfactory.y_grid.back(), 1.0);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids.size(), 32ull);
+
+		EXPECT_EQ(adjfactory.far_factory.cell_intervals.back(), adjfactory.far_factory.cell_ids.size());
+
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[0], 2ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[1], 5ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[2], 6ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[3], 7ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[4], 8ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[5], 6ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[6], 7ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[7], 8ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[8], 0ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[9], 3ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[10], 6ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[11], 7ull);
+
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[12], 8ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[13], 2ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[14], 5ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[15], 8ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[16], 0ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[17], 3ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[18], 6ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[19], 0ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[20], 1ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[21], 2ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[22], 5ull);
+		EXPECT_EQ(adjfactory.far_factory.cell_ids[23], 8ull);
+	}
+
 
 
 	TEST(Tofs, SingleCharge)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 1ull, domain };
+		BigAdjacencyFactory adjfactory{ 1ull, domain };
 		Factory factory{ adjfactory, 1ull };
 
 		SortedData data{ factory.get_sources() };
@@ -127,7 +198,7 @@ namespace DataGenerators
 	TEST(Tofs, FourCellsTwoCharges)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 2ull, domain };
+		BigAdjacencyFactory adjfactory{ 2ull, domain };
 		Factory factory{ adjfactory, 2ull };
 
 		SortedData data{ factory.get_sources() };
@@ -159,7 +230,7 @@ namespace DataGenerators
 	TEST(Tofs, NineCellsThreeCharges)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 3ull, domain };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
 		Factory factory{ adjfactory, 3ull };
 
 		SortedData data{ factory.get_sources() };
@@ -189,7 +260,7 @@ namespace DataGenerators
 	TEST(TofsMultiply, SingleCharge)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 1ull, domain };
+		BigAdjacencyFactory adjfactory{ 1ull, domain };
 		Factory factory{ adjfactory, 1ull };
 
 		SortedData data{ factory.get_sources() };
@@ -210,7 +281,7 @@ namespace DataGenerators
 	TEST(TofsMultiply, NineCellsThreeChargesFiveP)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		AdjacencyFactory adjfactory{ 3ull, domain };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
 		Factory factory{ adjfactory, 3ull };
 
 		SortedData data{ factory.get_sources() };
