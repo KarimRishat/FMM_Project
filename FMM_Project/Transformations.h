@@ -97,7 +97,7 @@ namespace Calculate_FMM
 	};
 
 
-	class Incoming_tanslate_operator
+	class Incoming_translate_operator
 	{
 
 		//Matrix P*P
