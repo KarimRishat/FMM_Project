@@ -107,6 +107,8 @@ namespace Calculate_FMM
 
 		Factory Grid_with_data;
 
+		
+
 		unsigned char P;
 
 		// Makes the T_ifo operators for all cells in field
@@ -114,17 +116,16 @@ namespace Calculate_FMM
 		{
 			//SortedData data{ Grid_with_data.get_sources() };
 
-			FarFactory* far_cells = &Grid_with_data.grid.far_factory;
+			const auto& far_cells = Grid_with_data.grid.far_factory;
+			
 
-			size_t far_cell_id, count_far, start_id;
-
-			for (size_t cell_id = 0; cell_id < Grid_with_data.grid.cell_centers.size(); ++cell_id)
+			for (size_t cell_id = 0, far_cell_id, count_far, start_id; cell_id < Grid_with_data.grid.cell_centers.size(); ++cell_id)
 			{
-				start_id = cell_id * far_cells->cell_intervals[cell_id];
-				count_far = far_cells->cell_intervals[cell_id + 1] - far_cells->cell_intervals[cell_id];
+				start_id = cell_id * far_cells.cell_intervals[cell_id];
+				count_far = far_cells.cell_intervals[cell_id + 1] - far_cells.cell_intervals[cell_id];
 				for (size_t i = 0; i < count_far; ++i)
 				{
-					far_cell_id = far_cells->cell_ids[start_id + i];
+					far_cell_id = far_cells.cell_ids[start_id + i];
 					T_ifo_container.middleCols
 					(P * (start_id + i), P) = Fill_Tifo(cell_id, far_cell_id);
 				}
@@ -171,6 +172,14 @@ namespace Calculate_FMM
 
 		}
 
+
+	public:
+		Incoming_translate_operator(const Factory& factory, unsigned char P)
+			:Grid_with_data{ factory }, P{ P }
+		{
+			T_ifo_container = MatrixXcd::Ones(P, P * P * Grid_with_data.grid.far_factory.cell_intervals.size());
+			Fill_T_ifo_container();
+		}
 		/*auto T_ifo(size_t target_id, size_t source_id) const
 		{
 			return MatrixXcd::Map(

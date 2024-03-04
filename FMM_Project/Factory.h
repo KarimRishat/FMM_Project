@@ -265,8 +265,8 @@ struct BigAdjacencyFactory:
 {
 	using point_t = Eigen::dcomplex;
 	std::vector<point_t> cell_centers;
-	struct AdjacencyFactory adjacency_factory;
-	struct FarFactory far_factory;
+	AdjacencyFactory adjacency_factory;
+	FarFactory far_factory;
 
 	explicit BigAdjacencyFactory(
 		size_t m,
