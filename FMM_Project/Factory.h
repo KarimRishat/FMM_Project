@@ -406,7 +406,8 @@ struct Factory
 	//:public GridFactory
 {
 	size_t q_per_block;
-	BigAdjacencyFactory grid;//AdjCellsFactory
+	BigAdjacencyFactory grid;
+	//AdjCellsFactory
 	//FarCellsFactory
 
 	explicit Factory(
