@@ -18,7 +18,25 @@ namespace DataStructs
 		double x;
 		double y;
 		double q;
+
 	};
+
+	struct y_sort
+	{
+		bool operator() (const Data& lhs, const Data& rhs) const
+		{
+			return lhs.y < rhs.y;
+		}
+	};
+
+	struct x_sort
+	{
+		bool operator() (const Data& lhs, const Data& rhs) const
+		{
+			return lhs.x < rhs.x;
+		}
+	};
+
 
 	struct InputDataType
 	{
@@ -32,6 +50,27 @@ namespace DataStructs
 		{
 			return data[i];
 		}
+
+		void Sort_InputDataType()
+		{
+			std::sort(data.begin(), data.end(), y_sort());
+
+			for (size_t i = 0, start_idx = 0, idx = 0; idx < size(); i++)
+			{
+				if (data[idx].y < y_grid[i+1])
+				{
+					continue;
+				}
+
+				std::sort(data.begin() + start_idx, data.begin() + idx, x_sort());
+				++i;
+				start_idx = idx;
+			}
+
+			std::sort(data.begin() + start)
+
+		}
+
 	};
 
 	struct UseDataType
@@ -103,19 +142,11 @@ namespace DataStructs
 			}
 		}
 
-		//contructor, that finds centers
-		/*SortedData(
-			const UseDataType& data,
-			const std::vector<size_t>& interval_ids) :
-			UseDataType{ data },
-			interval_ids{ interval_ids }
+
+		void Sort()
 		{
-			its_cell_center.reserve(interval_ids.size() - 1);
-			for (size_t i = 0; i < interval_ids.size() - 1; ++i)
-			{
-				its_cell_center.push_back(Find_center(i));
-			}
-		}*/
+			std::sort(data)
+		}
 
 
 		SortedData(
