@@ -137,7 +137,7 @@ namespace Calculate_FMM
 
 			T_ifo(1, 0) = T_ifo(0, 1);
 
-			T_ifo(1, 1) = T_ifo(0, 1);
+			T_ifo(1, 1) = T_ifo(0, 1)/c_delta;
 
 			//First 2 rows
 			for (size_t j = 2; j < P; j++)

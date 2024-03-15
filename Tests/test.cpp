@@ -203,7 +203,7 @@ namespace TranslateOps
 	{
 		MatrixXcd result(P, P);
 
-		result(0, 0) = std::log(cells_dif);
+		result(0, 0) = std::log(-cells_dif);
 
 		for (size_t j = 1; j < P; ++j)
 		{
@@ -386,7 +386,7 @@ namespace TranslateOps
 	}
 
 
-	TEST(Tifo, NineCellsThreeCharges)
+	TEST(Tifo, NineCellsThreeChargesMultiply)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		BigAdjacencyFactory adjfactory{ 3ull, domain };
@@ -428,5 +428,50 @@ namespace TranslateOps
 			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
 		}
 	}
+
+
+	TEST(Tifo, NineCellsThreeCharges)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 3ull };
+		unsigned char P = 5;
+
+		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		Calculate_FMM::TranslateOperator tofs{ factory.get_sources(),P };
+
+		auto sources = tofs.Outgoing_expansion();
+
+		for (size_t cell_id = 0, far_cell_id, count_far, start_id;
+			cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			auto tifo_matrix = t_ifo.T_ifo(cell_id);
+			VectorXcd sum_vector = VectorXcd::Zero(P);
+			count_far = factory.grid.far_factory.cell_count[cell_id];
+			start_id = factory.grid.far_factory.cell_intervals[cell_id];
+			for (size_t source_id = 0; source_id < factory.grid.far_factory.cell_count[cell_id]; ++source_id)
+			{
+				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
+				point_t cells_diff = factory.grid.cell_centers[far_cell_id] - factory.grid.cell_centers[cell_id];
+				auto result = FindTifo(cells_diff, P);
+				auto expected = tifo_matrix.block(0, P * source_id, P, P);
+				for (size_t i = 0; i < P; ++i)
+				{
+					for (size_t j = 0; j < P; ++j)
+					{
+						EXPECT_NEAR(result(i,j).real(), expected(i,j).real(), EPS);
+						EXPECT_NEAR(result(i,j).imag(), expected(i,j).imag(), EPS);
+					}
+				}
+
+			}
+
+		}
+	}
+
+
+
+
 
 }
