@@ -105,14 +105,13 @@ namespace Calculate_FMM
 		// Makes the T_ifo operators for all cells in field
 		void Fill_T_ifo_container()
 		{
-			//SortedData data{ Grid_with_data.get_sources() };
-
 			const auto& far_cells = Grid_with_data->grid.far_factory;
-			
 
-			for (size_t cell_id = 0, far_cell_id, count_far, start_id; cell_id < Grid_with_data->grid.cell_centers.size(); ++cell_id)
+			for (size_t cell_id = 0, far_cell_id, count_far, start_id; 
+				cell_id < Grid_with_data->grid.cell_centers.size(); ++cell_id)
 			{
-				start_id = cell_id * far_cells.cell_intervals[cell_id];
+				/*start_id = cell_id == 0?0:cell_id * far_cells.cell_intervals[cell_id]-1;*/
+				start_id = far_cells.cell_intervals[cell_id];
 				count_far = far_cells.cell_count[cell_id];
 				for (size_t i = 0; i < count_far; ++i)
 				{
@@ -168,7 +167,8 @@ namespace Calculate_FMM
 		Incoming_translate_operator(const Factory &factory, unsigned char P)
 			:Grid_with_data{ &factory }, P{ P }
 		{
-			T_ifo_container = MatrixXcd::Zero(P, P * P * Grid_with_data->grid.far_factory.cell_intervals.size());
+			T_ifo_container = MatrixXcd::Ones(P, 
+				P * P * Grid_with_data->grid.far_factory.cell_intervals.size() + 1);
 			Fill_T_ifo_container();
 		}
 
@@ -186,7 +186,7 @@ namespace Calculate_FMM
 
 			TranslateOperator tofs{ Grid_with_data->get_sources(),P };
 
-			VectorXd sources(tofs.Outgoing_expansion());
+			auto sources = tofs.Outgoing_expansion();
 
 			size_t cells_count = Grid_with_data->grid.cell_centers.size();
 
@@ -197,13 +197,13 @@ namespace Calculate_FMM
 
 				far_cells_count = Grid_with_data->grid.far_factory.cell_count[cell_id];
 
-				MatrixXcd t_ifo(T_ifo(cell_id));
+				MatrixXcd t_ifo = T_ifo(cell_id);
 
 				VectorXcd sum_vector = VectorXcd::Zero(P);
 
 				for (size_t far_id = 0; far_id < far_cells_count; ++far_id)
 				{
-					sum_vector += t_ifo.block(0, P * far_id, P, P) * sources(P * cell_id, P);
+					sum_vector += t_ifo.block(0, P * far_id, P, P) * sources.segment(P * cell_id, P);
 				}
 
 				result.segment(cell_id * P, P) = sum_vector;

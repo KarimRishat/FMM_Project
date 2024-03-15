@@ -7,7 +7,8 @@
 // https://github.com/google/googletest/blob/main/docs/primer.md
 // https://learn.microsoft.com/ru-ru/visualstudio/test/run-unit-tests-with-test-explorer?view=vs-2022
 
-using point_t = Eigen::dcomplex;
+using point_t = Eigen::dcomplex; 
+using namespace Eigen;
 using namespace DataStructs;
 
 namespace DataGenerators
@@ -279,8 +280,6 @@ namespace TranslateOps
 	}
 
 
-
-
 	TEST(TofsMultiply, NineCellsThreeChargesFiveP)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
@@ -313,7 +312,8 @@ namespace TranslateOps
 				for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
 				{
 					expected(cell_id * P + p) += -1.0 / p *
-						std::pow(data.point[start_id + source] - data.cell_center(cell_id), p) * data.q[start_id + source];
+						std::pow(data.point[start_id + source] - data.cell_center(cell_id), p)
+							* data.q[start_id + source];
 				}
 			}
 		}
@@ -325,7 +325,6 @@ namespace TranslateOps
 		}
 
 	}
-
 
 
 	TEST(TofsMultiply, FiveChargesInOneCellTwoP)
@@ -346,18 +345,30 @@ namespace TranslateOps
 	}
 
 
-	TEST(Tifo, SingleCharge)
+	TEST(Tifo, NineCellsThreeCharges)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		BigAdjacencyFactory adjfactory{ 1ull, domain };
-		Factory factory{ adjfactory, 1ull };
-		unsigned char P = 2;
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 3ull };
+		unsigned char P = 5;
 
 		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		auto result = t_ifo.Incoming_expansion();
+
+		std::cout << result;
+
+
+		/*for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			MatrixXcd t_ifo_matrix = t_ifo.T_ifo(cell_id);
+
+
+
+		}*/
 
 		/*EXPECT_EQ(t_ifo.T_ifo(0)(0, 0), point_t(1.0));
 		EXPECT_EQ(t_ifo.T_ifo(0)(1, 0), -point_t(1.0) * (data.point[0] - data.cell_center(0)));*/
 	}
-
 
 }
