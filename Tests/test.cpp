@@ -183,6 +183,47 @@ namespace DataGenerators
 
 namespace TranslateOps
 {
+	size_t fact(size_t n)
+	{
+		if (n == 0)
+			return 1;
+		size_t res = 1;
+		for (size_t i = 2; i <= n; i++)
+			res = res * i;
+		return res;
+	}
+
+	size_t nCr(size_t n, size_t r)
+	{
+		return fact(n) / (fact(r) * fact(n - r));
+	}
+
+
+	MatrixXcd FindTifo(point_t cells_dif,size_t P)
+	{
+		MatrixXcd result(P, P);
+
+		result(0, 0) = std::log(cells_dif);
+
+		for (size_t j = 1; j < P; ++j)
+		{
+			result(0, j) = std::pow(-1.0, j) / std::pow(cells_dif, j);
+		}
+
+		for (size_t i = 1; i < P; ++i)
+		{
+			result(i, 0) = -1.0 / ((point_t)i * std::pow(cells_dif, i));
+
+			for (size_t j = 1; j < P; j++)
+			{
+				result(i, j) = std::pow(-1.0, j) * nCr(i+j-1,j-1) / std::pow(cells_dif, (i + j));
+			}
+		}
+		return result;
+	}
+
+
+
 	TEST(Tofs, SingleCharge)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
@@ -356,19 +397,36 @@ namespace TranslateOps
 
 		auto result = t_ifo.Incoming_expansion();
 
-		std::cout << result;
+		Eigen::VectorXcd expected = VectorXcd::Zero(P * factory.grid.cell_centers.size());
 
+		EXPECT_EQ(result.size(), expected.size());
 
-		/*for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		Calculate_FMM::TranslateOperator tofs{ factory.get_sources(),P };
+
+		auto sources = tofs.Outgoing_expansion();
+
+		for (size_t cell_id = 0, far_cell_id, count_far, start_id;
+			cell_id < factory.grid.cell_centers.size(); ++cell_id)
 		{
-			MatrixXcd t_ifo_matrix = t_ifo.T_ifo(cell_id);
+			VectorXcd sum_vector = VectorXcd::Zero(P);
+			count_far = factory.grid.far_factory.cell_count[cell_id];
+			start_id = factory.grid.far_factory.cell_intervals[cell_id];
+			for (size_t source_id = 0; source_id < factory.grid.far_factory.cell_count[cell_id]; ++source_id)
+			{
+				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
+				point_t cells_diff = factory.grid.cell_centers[cell_id] - factory.grid.cell_centers[far_cell_id];
+				auto temp = FindTifo(cells_diff, P);
+				sum_vector += temp * sources.segment(P * cell_id, P);
+			}
+			expected.segment(cell_id * P, P) = sum_vector;
 
+		}
 
-
-		}*/
-
-		/*EXPECT_EQ(t_ifo.T_ifo(0)(0, 0), point_t(1.0));
-		EXPECT_EQ(t_ifo.T_ifo(0)(1, 0), -point_t(1.0) * (data.point[0] - data.cell_center(0)));*/
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
 	}
 
 }
