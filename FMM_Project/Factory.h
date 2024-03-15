@@ -141,6 +141,7 @@ struct FarFactory
 {
 	std::vector<size_t> cell_ids;
 	std::vector<size_t> cell_intervals;
+	std::vector<size_t> cell_count;
 	size_t m;
 	explicit FarFactory(size_t m) : m{ m }
 	{
@@ -150,6 +151,7 @@ struct FarFactory
 protected:
 	void set_far_cells()
 	{
+		cell_count.reserve(m * m);
 		cell_intervals.reserve(m * m + 1);
 		size_t area = m * m;
 		cell_ids.reserve((area - 9) * (m - 2) * (m - 2)
@@ -253,7 +255,7 @@ protected:
 
 				std::sort(cell_ids.begin() + cell_intervals.back(), cell_ids.end());
 				cell_intervals.push_back(cell_intervals.back() + count);
-
+				cell_count.push_back(count);
 			}
 		}
 	}

@@ -7,11 +7,11 @@
 // https://github.com/google/googletest/blob/main/docs/primer.md
 // https://learn.microsoft.com/ru-ru/visualstudio/test/run-unit-tests-with-test-explorer?view=vs-2022
 
+using point_t = Eigen::dcomplex;
+using namespace DataStructs;
 
 namespace DataGenerators
 {
-	using point_t = Eigen::dcomplex;
-	using namespace DataStructs;
 	TEST(DomainTest, DefaultState) {
 
 		Domain domain{};
@@ -177,8 +177,11 @@ namespace DataGenerators
 		EXPECT_EQ(adjfactory.far_factory.cell_ids[23], 8ull);
 	}
 
+}
 
 
+namespace TranslateOps
+{
 	TEST(Tofs, SingleCharge)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
@@ -191,7 +194,7 @@ namespace DataGenerators
 
 		Calculate_FMM::TranslateOperator tras_op{ data, P };
 
-		EXPECT_EQ(tras_op.T_ofs(0)(0,0), point_t(1.0));
+		EXPECT_EQ(tras_op.T_ofs(0)(0, 0), point_t(1.0));
 		EXPECT_EQ(tras_op.T_ofs(0)(1, 0), -point_t(1.0) * (data.point[0] - data.cell_center(0)));
 	}
 
@@ -305,12 +308,12 @@ namespace DataGenerators
 			{
 				expected(cell_id * P) += data.q[start_id + source];
 			}
-			for(size_t p = 1; p < P; ++p)
+			for (size_t p = 1; p < P; ++p)
 			{
 				for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
 				{
 					expected(cell_id * P + p) += -1.0 / p *
-						std::pow(data.point[start_id + source] - data.cell_center(cell_id), p) * data.q[start_id+source];
+						std::pow(data.point[start_id + source] - data.cell_center(cell_id), p) * data.q[start_id + source];
 				}
 			}
 		}
@@ -339,11 +342,22 @@ namespace DataGenerators
 		Eigen::VectorXcd result(tras_op.Outgoing_expansion());
 
 		EXPECT_EQ(result(0), point_t(3.0));
-		EXPECT_EQ(result(1), -point_t(6.0,9.0));
+		EXPECT_EQ(result(1), -point_t(6.0, 9.0));
 	}
 
 
+	TEST(Tifo, SingleCharge)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 1ull, domain };
+		Factory factory{ adjfactory, 1ull };
+		unsigned char P = 2;
 
+		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		/*EXPECT_EQ(t_ifo.T_ifo(0)(0, 0), point_t(1.0));
+		EXPECT_EQ(t_ifo.T_ifo(0)(1, 0), -point_t(1.0) * (data.point[0] - data.cell_center(0)));*/
+	}
 
 
 }

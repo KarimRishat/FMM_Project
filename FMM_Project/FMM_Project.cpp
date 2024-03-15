@@ -53,6 +53,13 @@ int main()
 
 	using namespace Eigen;
 
+	Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+	BigAdjacencyFactory adjfactory{ 1ull, domain };
+	Factory factory{ adjfactory, 1ull };
+	unsigned char P = 2;
+
+	Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
 }
 
 

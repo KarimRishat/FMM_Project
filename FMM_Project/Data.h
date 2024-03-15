@@ -21,21 +21,21 @@ namespace DataStructs
 
 	};
 
-	struct y_sort
-	{
-		bool operator() (const Data& lhs, const Data& rhs) const
-		{
-			return lhs.y < rhs.y;
-		}
-	};
+	//struct y_sort
+	//{
+	//	bool operator() (const Data& lhs, const Data& rhs) const
+	//	{
+	//		return lhs.y < rhs.y;
+	//	}
+	//};
 
-	struct x_sort
-	{
-		bool operator() (const Data& lhs, const Data& rhs) const
-		{
-			return lhs.x < rhs.x;
-		}
-	};
+	//struct x_sort
+	//{
+	//	bool operator() (const Data& lhs, const Data& rhs) const
+	//	{
+	//		return lhs.x < rhs.x;
+	//	}
+	//};
 
 
 	struct InputDataType
@@ -51,7 +51,7 @@ namespace DataStructs
 			return data[i];
 		}
 
-		void Sort_InputDataType()
+		/*void Sort_InputDataType()
 		{
 			std::sort(data.begin(), data.end(), y_sort());
 
@@ -69,7 +69,7 @@ namespace DataStructs
 
 			std::sort(data.begin() + start)
 
-		}
+		}*/
 
 	};
 
@@ -143,10 +143,10 @@ namespace DataStructs
 		}
 
 
-		void Sort()
+		/*void Sort()
 		{
 			std::sort(data)
-		}
+		}*/
 
 
 		SortedData(

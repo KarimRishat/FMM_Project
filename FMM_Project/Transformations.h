@@ -73,10 +73,7 @@ namespace Calculate_FMM
 				P, data.interval_count[cell_id]);
 		}
 
-
-
 		//q^sigma - outgoing expansion of Omega
-
 
 		VectorXcd Outgoing_expansion()
 		{
@@ -92,10 +89,6 @@ namespace Calculate_FMM
 			}
 			return result;
 		}
-
-
-		
-
 	};
 
 
@@ -105,9 +98,7 @@ namespace Calculate_FMM
 		//Matrix P*P*size(farfactory.cell_intervals)
 		MatrixXcd T_ifo_container;
 
-		Factory Grid_with_data;
-
-		
+		const Factory* Grid_with_data;
 
 		unsigned char P;
 
@@ -116,13 +107,13 @@ namespace Calculate_FMM
 		{
 			//SortedData data{ Grid_with_data.get_sources() };
 
-			const auto& far_cells = Grid_with_data.grid.far_factory;
+			const auto& far_cells = Grid_with_data->grid.far_factory;
 			
 
-			for (size_t cell_id = 0, far_cell_id, count_far, start_id; cell_id < Grid_with_data.grid.cell_centers.size(); ++cell_id)
+			for (size_t cell_id = 0, far_cell_id, count_far, start_id; cell_id < Grid_with_data->grid.cell_centers.size(); ++cell_id)
 			{
 				start_id = cell_id * far_cells.cell_intervals[cell_id];
-				count_far = far_cells.cell_intervals[cell_id + 1] - far_cells.cell_intervals[cell_id];
+				count_far = far_cells.cell_count[cell_id];
 				for (size_t i = 0; i < count_far; ++i)
 				{
 					far_cell_id = far_cells.cell_ids[start_id + i];
@@ -135,7 +126,7 @@ namespace Calculate_FMM
 		// Makes the incoming from outgoing translation operator for cell
 		MatrixXcd Fill_Tifo(size_t target_id, size_t source_id)
 		{
-			SortedData data{ Grid_with_data.get_sources() };
+			SortedData data{ Grid_with_data->get_sources() };
 			//(c_sigma - c_tau)
 			point_t c_delta = data.cell_center(source_id) - data.cell_center(target_id);
 
@@ -174,38 +165,51 @@ namespace Calculate_FMM
 
 
 	public:
-		Incoming_translate_operator(const Factory& factory, unsigned char P)
-			:Grid_with_data{ factory }, P{ P }
+		Incoming_translate_operator(const Factory &factory, unsigned char P)
+			:Grid_with_data{ &factory }, P{ P }
 		{
-			T_ifo_container = MatrixXcd::Ones(P, P * P * Grid_with_data.grid.far_factory.cell_intervals.size());
+			T_ifo_container = MatrixXcd::Zero(P, P * P * Grid_with_data->grid.far_factory.cell_intervals.size());
 			Fill_T_ifo_container();
 		}
-		/*auto T_ifo(size_t target_id, size_t source_id) const
+
+		//Matrix P*far_cells_count of target cell
+		auto T_ifo(size_t target_id) const
 		{
 			return MatrixXcd::Map(
-				T_ifo_container.data() + P * data.interval_ids[target_id],
-				P, data.interval_count[target_id]);
+				T_ifo_container.data() + P * Grid_with_data->grid.far_factory.cell_intervals[target_id],
+				P, P * Grid_with_data->grid.far_factory.cell_count[target_id]);
+		}
 
-			return MatrixXcd::Map(
-				T_ifo_container.data() + P * data.interval_ids[target_id],
-				P, P);
 
-		}*/
-
-		/*VectorXcd Incoming_expansion()
+		VectorXcd Incoming_expansion()
 		{
-			Map<VectorXd> sources(data.q.data(), data.q.size());
 
-			VectorXcd result(data.interval_count.size() * P);
+			TranslateOperator tofs{ Grid_with_data->get_sources(),P };
 
-			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
+			VectorXd sources(tofs.Outgoing_expansion());
+
+			size_t cells_count = Grid_with_data->grid.cell_centers.size();
+
+			VectorXcd result(cells_count * P);
+
+			for (size_t cell_id = 0, far_cells_count; cell_id < cells_count; ++cell_id)
 			{
-				size_t start_id{ data.interval_ids[cell_id] };
-				size_t n{ data.interval_count[cell_id] };
-				result.segment(cell_id * P, P) = T_ofs(cell_id) * sources.segment(start_id, n);
+
+				far_cells_count = Grid_with_data->grid.far_factory.cell_count[cell_id];
+
+				MatrixXcd t_ifo(T_ifo(cell_id));
+
+				VectorXcd sum_vector = VectorXcd::Zero(P);
+
+				for (size_t far_id = 0; far_id < far_cells_count; ++far_id)
+				{
+					sum_vector += t_ifo.block(0, P * far_id, P, P) * sources(P * cell_id, P);
+				}
+
+				result.segment(cell_id * P, P) = sum_vector;
 			}
 			return result;
-		}*/
+		}
 	};
 
 
