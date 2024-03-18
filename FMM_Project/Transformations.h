@@ -95,8 +95,8 @@ namespace Calculate_FMM
 	class Incoming_translate_operator
 	{
 
-		//Matrix P*P*size(farfactory.cell_intervals)
-		MatrixXcd T_ifo_container;
+		////Matrix P*P*size(farfactory.cell_intervals)
+		//MatrixXcd T_ifo_container;
 
 		const Factory* Grid_with_data;
 
@@ -116,8 +116,9 @@ namespace Calculate_FMM
 				for (size_t i = 0; i < count_far; ++i)
 				{
 					far_cell_id = far_cells.cell_ids[start_id + i];
-					T_ifo_container.middleCols
-					(P * (start_id + i), P) = Fill_Tifo(cell_id, far_cell_id);
+					/*T_ifo_container.middleCols
+					(P * (start_id + i), P) = Fill_Tifo(cell_id, far_cell_id);*/
+					T_ifo_container.block(0, P * (start_id + i),P,P) = Fill_Tifo(cell_id, far_cell_id);
 				}
 			}
 		}
@@ -142,28 +143,30 @@ namespace Calculate_FMM
 			//First 2 rows
 			for (size_t j = 2; j < P; j++)
 			{
+				auto a = T_ifo(1, j - 1);
+				auto b = ((point_t)j / (point_t)(j - 1)) * (-1.0) * (T_ifo(1, j - 1) / c_delta);
 				T_ifo(0, j) = (-1.0) * T_ifo(0, j - 1) / c_delta;
-				T_ifo(1, j) = (point_t)(j / (j - 1)) * (-1.0) * T_ifo(1, j - 1) / c_delta;
+				T_ifo(1, j) = ((point_t)j / (point_t)(j - 1)) * (-1.0) * T_ifo(1, j - 1) / c_delta;
 			}
 
 			for (size_t p = 2; p < P; p++)
 			{
-
-				T_ifo(p, 0) = (point_t)((p - 1) / p) * T_ifo(p - 1, 0) / c_delta;
+				T_ifo(p, 0) = ((point_t)(p - 1) / (point_t)p) * T_ifo(p - 1, 0) / c_delta;
 				T_ifo(p, 1) = T_ifo(p - 1, 1) / c_delta;
 
 				for (size_t j = 2; j < P; j++)
 				{
-					T_ifo(p, j) = (-1.0) * (point_t)((p + j - 1) / (j - 1)) * T_ifo(p, j - 1) / c_delta;
+					T_ifo(p, j) = (-1.0) * ((point_t)(p + j - 1) / (point_t)(j - 1)) * T_ifo(p, j - 1) / c_delta;
 				}
 			}
 
 			return T_ifo;
 
 		}
-
-
 	public:
+
+		MatrixXcd T_ifo_container;
+
 		Incoming_translate_operator(const Factory &factory, unsigned char P)
 			:Grid_with_data{ &factory }, P{ P }
 		{
@@ -175,9 +178,12 @@ namespace Calculate_FMM
 		//Matrix P*far_cells_count of target cell
 		auto T_ifo(size_t target_id) const
 		{
-			return MatrixXcd::Map(
+			auto a = P * Grid_with_data->grid.far_factory.cell_intervals[target_id];
+			auto b = P * Grid_with_data->grid.far_factory.cell_count[target_id];
+			return T_ifo_container.block(0, a, P, b);
+			/*return MatrixXcd::Map(
 				T_ifo_container.data() + P * Grid_with_data->grid.far_factory.cell_intervals[target_id],
-				P, P * Grid_with_data->grid.far_factory.cell_count[target_id]);
+				P, P * Grid_with_data->grid.far_factory.cell_count[target_id]);*/
 		}
 
 

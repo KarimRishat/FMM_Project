@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "../FMM_Project/Factory.h"
 #include "../FMM_Project/Transformations.h"
-#define EPS 1e-15
+#define EPS 1e-10
 
 // https://learn.microsoft.com/ru-ru/visualstudio/test/how-to-use-google-test-for-cpp?view=vs-2022
 // https://github.com/google/googletest/blob/main/docs/primer.md
@@ -193,9 +193,9 @@ namespace TranslateOps
 		return res;
 	}
 
-	size_t nCr(size_t n, size_t r)
+	double nCr(size_t n, size_t r)
 	{
-		return fact(n) / (fact(r) * fact(n - r));
+		return (double)fact(n) / (fact(r) * fact(n - r));
 	}
 
 
@@ -414,7 +414,7 @@ namespace TranslateOps
 			for (size_t source_id = 0; source_id < factory.grid.far_factory.cell_count[cell_id]; ++source_id)
 			{
 				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
-				point_t cells_diff = factory.grid.cell_centers[cell_id] - factory.grid.cell_centers[far_cell_id];
+				point_t cells_diff = factory.grid.cell_centers[far_cell_id] - factory.grid.cell_centers[cell_id];
 				auto temp = FindTifo(cells_diff, P);
 				sum_vector += temp * sources.segment(P * cell_id, P);
 			}
@@ -447,15 +447,14 @@ namespace TranslateOps
 			cell_id < factory.grid.cell_centers.size(); ++cell_id)
 		{
 			auto tifo_matrix = t_ifo.T_ifo(cell_id);
-			VectorXcd sum_vector = VectorXcd::Zero(P);
 			count_far = factory.grid.far_factory.cell_count[cell_id];
 			start_id = factory.grid.far_factory.cell_intervals[cell_id];
-			for (size_t source_id = 0; source_id < factory.grid.far_factory.cell_count[cell_id]; ++source_id)
+			for (size_t source_id = 0; source_id < count_far; ++source_id)
 			{
 				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
 				point_t cells_diff = factory.grid.cell_centers[far_cell_id] - factory.grid.cell_centers[cell_id];
-				auto result = FindTifo(cells_diff, P);
-				auto expected = tifo_matrix.block(0, P * source_id, P, P);
+				auto result = tifo_matrix.block(0, P * source_id, P, P);
+				auto expected = FindTifo(cells_diff, P);
 				for (size_t i = 0; i < P; ++i)
 				{
 					for (size_t j = 0; j < P; ++j)
