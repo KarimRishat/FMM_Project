@@ -110,15 +110,13 @@ namespace Calculate_FMM
 			for (size_t cell_id = 0, far_cell_id, count_far, start_id; 
 				cell_id < Grid_with_data->grid.cell_centers.size(); ++cell_id)
 			{
-				/*start_id = cell_id == 0?0:cell_id * far_cells.cell_intervals[cell_id]-1;*/
 				start_id = far_cells.cell_intervals[cell_id];
 				count_far = far_cells.cell_count[cell_id];
 				for (size_t i = 0; i < count_far; ++i)
 				{
 					far_cell_id = far_cells.cell_ids[start_id + i];
-					/*T_ifo_container.middleCols
-					(P * (start_id + i), P) = Fill_Tifo(cell_id, far_cell_id);*/
-					T_ifo_container.block(0, P * (start_id + i),P,P) = Fill_Tifo(cell_id, far_cell_id);
+					T_ifo_container.middleCols
+					(P * (start_id + i), P) = Fill_Tifo(cell_id, far_cell_id);
 				}
 			}
 		}
@@ -213,6 +211,86 @@ namespace Calculate_FMM
 				}
 
 				result.segment(cell_id * P, P) = sum_vector;
+			}
+			return result;
+		}
+	};
+
+
+	//Translate targets from incoming operator
+	class Target_translate_operator
+	{
+
+	private:
+		SortedData data; // sorted field of charges
+		VectorXcd incoming_expansion; //u^tau
+		unsigned char P; // the error
+
+		//Matrix size(q)*P
+		MatrixXcd T_tfi_container;
+
+
+		// Makes the targets from incoming operator for cell
+		MatrixXcd Fill_Ttfi(size_t cell_id)
+		{
+			MatrixXcd T_tfi(data.interval_count[cell_id], P);
+
+			size_t start_id{ data.interval_ids[cell_id] };
+
+			size_t end_id{ data.interval_ids[cell_id + 1ull] };
+
+			point_t center_tau{ data.cell_center(cell_id) };
+			for (size_t source_local = 0, source_global = start_id;
+				source_global < end_id; ++source_local, ++source_global)
+			{
+				T_tfi(source_local,0) = 1.0;
+				auto delta = data.point[source_global] - center_tau;
+				for (size_t p = 1; p < P; ++p)
+					T_tfi(source_local,p) = T_tfi(source_local,p-1) * delta;
+			}
+			return T_tfi;
+		}
+
+
+		// Makes the T_ofs operators for all cells in field
+		void Fill_T_ofs_container()
+		{
+			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
+			{
+				/*T_tfi_container.middleCols
+				(data.interval_ids[cell_id], data.interval_count[cell_id]) = Fill_Ttfi(cell_id);*/
+				T_tfi_container.block(data.interval_ids[cell_id], 0,
+					data.interval_count[cell_id], P) = Fill_Ttfi(cell_id);
+			}
+		}
+
+	public:
+
+		Target_translate_operator(const SortedData& data, unsigned char P, const VectorXcd& v) : data{ data }, P{ P }, incoming_expansion{v}
+		{
+			T_tfi_container = MatrixXcd::Ones(data.interval_ids.back(),P);
+			Fill_T_ofs_container();
+		}
+
+		auto T_tfi(size_t cell_id) const
+		{
+			/*return MatrixXcd::Map(
+				T_tfi_container.data() + P * data.interval_ids[cell_id],
+				P, data.interval_count[cell_id]);*/
+			return T_tfi_container.block(data.interval_ids[cell_id], 0, data.interval_count[cell_id], P);
+		}
+
+		//u_1 - final potential from far cells
+
+		VectorXcd Final_potential()
+		{
+			VectorXcd result(data.q.size());
+
+			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
+			{
+				size_t start_id{ data.interval_ids[cell_id] };
+				size_t n{ data.interval_count[cell_id] };
+				result.segment(start_id, n) = T_tfi(cell_id) * incoming_expansion.segment(cell_id * P, P);
 			}
 			return result;
 		}

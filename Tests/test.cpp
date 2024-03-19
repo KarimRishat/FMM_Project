@@ -468,8 +468,85 @@ namespace TranslateOps
 
 		}
 	}
+	TEST(Ttfi, NineCellsThreeCharges)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 3ull };
+		unsigned char P = 5;
+
+		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		auto incoming_vector = t_ifo.Incoming_expansion();
+
+		Calculate_FMM::Target_translate_operator t_tfi{ factory.get_sources(),P,incoming_vector };
+
+		SortedData data{ factory.get_sources() };
 
 
+		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+
+			size_t start_id{ data.interval_ids[cell_id] };
+			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+			{
+				EXPECT_EQ(t_tfi.T_tfi(cell_id)(source, 0), 1.0);
+				for (size_t p = 1; p < P; ++p)
+				{
+					auto result = t_tfi.T_tfi(cell_id)(source, p);
+					auto expected = std::pow(data.point[start_id + source] - data.cell_center(cell_id), p);
+					EXPECT_NEAR(result.real(), expected.real(), EPS);
+					EXPECT_NEAR(result.imag(), expected.imag(), EPS);
+				}
+			}
+		}
+	}
+
+	TEST(TtfiMultiply, NineCellsThreeCharges)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 3ull };
+		unsigned char P = 5;
+
+		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		auto incoming_vector = t_ifo.Incoming_expansion();
+
+		Calculate_FMM::Target_translate_operator t_tfi{ factory.get_sources(),P,incoming_vector };
+
+		auto result = t_tfi.Final_potential();
+
+		SortedData data{ factory.get_sources() };
+
+		Eigen::VectorXcd expected(data.interval_ids.back());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			size_t start_id{ data.interval_ids[cell_id] };
+			
+			for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
+			{
+				auto delta = data.point[start_id + source] - data.cell_center(cell_id);
+				for (size_t p = 0; p < P; ++p)
+				{
+					auto a = std::pow(delta, p) * incoming_vector[start_id + source];
+					expected(start_id + source) += std::pow(delta, p) * incoming_vector[start_id + source];
+				}
+			}
+			
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
 
 
 
