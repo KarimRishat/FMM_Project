@@ -525,6 +525,8 @@ namespace TranslateOps
 
 		EXPECT_EQ(result.size(), expected.size());
 
+		std::cout << "вектор incoming--------\n" << incoming_vector<<"\n----------------\n";
+
 		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
 		{
 			size_t start_id{ data.interval_ids[cell_id] };
@@ -534,12 +536,17 @@ namespace TranslateOps
 				auto delta = data.point[start_id + source] - data.cell_center(cell_id);
 				for (size_t p = 0; p < P; ++p)
 				{
-					auto a = std::pow(delta, p) * incoming_vector[start_id + source];
-					expected(start_id + source) += std::pow(delta, p) * incoming_vector[start_id + source];
+					auto a = std::pow(delta, p) * incoming_vector(start_id + source);
+					expected(start_id + source) += a;
 				}
 			}
 			
 		}
+
+		std::cout << "вектор result--------\n" << result << "\n----------------\n";
+
+		std::cout << "вектор expected--------\n" << expected << "\n----------------\n";
+
 
 		for (size_t i = 0; i < result.size(); i++)
 		{

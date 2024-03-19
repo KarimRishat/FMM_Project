@@ -290,7 +290,10 @@ namespace Calculate_FMM
 			{
 				size_t start_id{ data.interval_ids[cell_id] };
 				size_t n{ data.interval_count[cell_id] };
-				result.segment(start_id, n) = T_tfi(cell_id) * incoming_expansion.segment(cell_id * P, P);
+				MatrixXcd a = T_tfi(cell_id);
+				VectorXcd b = incoming_expansion.segment(cell_id * P, P);
+				VectorXcd c = a * b;
+				result.segment(start_id, n) = c;
 			}
 			return result;
 		}
