@@ -223,7 +223,7 @@ namespace Calculate_FMM
 
 	private:
 		SortedData data; // sorted field of charges
-		/*VectorXcd incoming_expansion;*/ //u^tau
+		VectorXcd incoming_expansion; //u^tau
 		unsigned char P; // the error
 
 		//Matrix size(q)*P
@@ -265,7 +265,6 @@ namespace Calculate_FMM
 		}
 
 	public:
-		VectorXcd incoming_expansion;
 		Target_translate_operator(const SortedData& data, unsigned char P, const VectorXcd& v) : data{ data }, P{ P }, incoming_expansion{v}
 		{
 			T_tfi_container = MatrixXcd::Ones(data.interval_ids.back(),P);
@@ -299,6 +298,28 @@ namespace Calculate_FMM
 		}
 	};
 
+	class Solver
+	{
+		const Factory* Grid_with_data;
 
+		unsigned char P;
+
+		VectorXcd FindOwnPotential()
+		{
+
+		}
+
+		VectorXcd FindNeighbourPotential()
+		{
+
+		}
+
+
+		VectorXcd FindFarPotential()
+		{
+
+		}
+
+	};
 
 }
