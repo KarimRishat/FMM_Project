@@ -302,23 +302,128 @@ namespace Calculate_FMM
 	{
 		const Factory* Grid_with_data;
 
+		SortedData data;
+
 		unsigned char P;
 
-		VectorXcd FindOwnPotential()
+		/*MatrixXcd CreateMatrix(size_t target_id, size_t source_id)
 		{
+			size_t rows{ data.interval_count[target_id] }, cols{ data.interval_count[source_id] },
+				start_id_target{ data.interval_ids[target_id] }, start_id_source{ data.interval_ids[source_id] };
+
+			MatrixXcd A(rows, cols);
+
+			for (size_t row_id = 0; row_id < rows; ++row_id)
+			{
+				for (size_t col_id = 0; col_id < cols; ++col_id)
+				{
+
+					if (target_id == source_id && col_id == row_id)
+						A(row_id, col_id) = 0;
+					else
+					{
+						auto x = data.point[start_id_target + row_id];
+						auto y = data.point[start_id_source + col_id];
+						A(row_id, col_id) = log(x - y);
+					}
+				}
+			}
+
+		}*/
+
+		VectorXcd FindOwnPotential(size_t cell_id)
+		{
+			Map<VectorXd> q_target(data.q.data() + data.interval_ids[cell_id], data.interval_count[cell_id]);
+			return CreateMatrix(cell_id, cell_id) * q_target;
+		}
+
+		VectorXcd FindNeighbourPotential(size_t cell_id)
+		{
+			VectorXcd result = VectorXcd::Zero(data.interval_count[cell_id]);
+
+			size_t start_id{ Grid_with_data->grid.adjacency_factory.cell_intervals[cell_id] };
+
+			size_t neighb_count{ Grid_with_data->grid.adjacency_factory.cell_count[cell_id] };
+
+			for (size_t source_local = 0, source_global; source_local < neighb_count; ++source_local)
+			{
+				source_global = Grid_with_data->grid.adjacency_factory.cell_ids[start_id + source_local];
+
+				auto matrix = CreateMatrix(cell_id, source_global);
+
+				Map<VectorXd> q_source(data.q.data() + data.interval_ids[source_global], data.interval_count[source_global]);
+
+				result += matrix * q_source;
+			}
+
+			return result;
 
 		}
 
-		VectorXcd FindNeighbourPotential()
+	public:
+		Solver(const Factory& factory, unsigned char P) :
+			Grid_with_data{ &factory }, P{ P }, data{ factory.get_sources() } {}
+
+		MatrixXcd CreateMatrix(size_t target_id, size_t source_id)
 		{
+			size_t rows{ data.interval_count[target_id] }, cols{ data.interval_count[source_id] },
+				start_id_target{ data.interval_ids[target_id] }, start_id_source{ data.interval_ids[source_id] };
+
+			MatrixXcd A(rows, cols);
+
+			for (size_t row_id = 0; row_id < rows; ++row_id)
+			{
+				for (size_t col_id = 0; col_id < cols; ++col_id)
+				{
+
+					if (target_id == source_id && col_id == row_id)
+						A(row_id, col_id) = 0;
+					else
+					{
+						auto x = data.point[start_id_target + row_id];
+						auto y = data.point[start_id_source + col_id];
+						A(row_id, col_id) = log(x - y);
+					}
+				}
+			}
+
+			return A;
 
 		}
 
 
-		VectorXcd FindFarPotential()
+		VectorXcd SumAllPotential()
 		{
 
+			Incoming_translate_operator t_ifo{ *Grid_with_data, P };
+
+			auto incoming_vector = t_ifo.Incoming_expansion();
+
+			Target_translate_operator t_tfi{ data,P,incoming_vector };
+
+			auto farPot = t_tfi.Final_potential();
+
+			VectorXcd ownPot = VectorXcd::Zero(data.q.size());
+
+			VectorXcd neighbPot = VectorXcd::Zero(data.q.size());
+
+			size_t cell_count = Grid_with_data->grid.cell_centers.size();
+
+			for (size_t cell_id = 0; cell_id < cell_count; ++cell_id)
+			{
+				ownPot.segment(data.interval_ids[cell_id], data.interval_count[cell_id])
+					= FindOwnPotential(cell_id);
+			}
+
+			for (size_t cell_id = 0; cell_id < cell_count; ++cell_id)
+			{
+				neighbPot.segment(data.interval_ids[cell_id], data.interval_count[cell_id])
+					= FindNeighbourPotential(cell_id);
+			}
+
+			return farPot + ownPot + neighbPot;
 		}
+
 
 	};
 

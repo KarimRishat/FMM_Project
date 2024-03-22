@@ -67,6 +67,7 @@ struct AdjacencyFactory
 {
 	std::vector<size_t> cell_ids;
 	std::vector<size_t> cell_intervals;
+	std::vector<size_t> cell_count;
 	size_t m;
 
 	explicit AdjacencyFactory(size_t m = 1) : m{ m }
@@ -76,6 +77,7 @@ struct AdjacencyFactory
 protected:
 	void set_adjacent_cells()
 	{
+		cell_count.reserve(m * m + 1);
 		cell_intervals.reserve(m * m + 1);
 		cell_ids.reserve(8 * m * m - 4 * (m + 1));
 
@@ -131,6 +133,7 @@ protected:
 				assert((m < 2) || (count > 2));
 				std::sort(cell_ids.begin() + cell_intervals.back(), cell_ids.end());
 				cell_intervals.push_back(cell_intervals.back() + count);
+				cell_count.push_back(count);
 			}
 		}
 	}

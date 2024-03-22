@@ -549,4 +549,49 @@ namespace TranslateOps
 
 
 
+
+	TEST(FullResult, NineCellsThreeCharges)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 3ull };
+		unsigned char P = 5;
+
+		Calculate_FMM::Solver fmm_solver{ factory, P };
+
+		SortedData data{ factory.get_sources() };
+
+		auto result = fmm_solver.SumAllPotential();
+
+		Eigen::VectorXcd expected(data.interval_ids.back());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			size_t start_id{ data.interval_ids[cell_id] };
+
+			for (size_t source_id = 0; source_id < factory.grid.cell_centers.size(); ++source_id)
+			{
+				auto matrix = fmm_solver.CreateMatrix(cell_id, source_id);
+
+				Map<VectorXd> q_source(data.q.data() + data.interval_ids[source_id], data.interval_count[source_id]);
+
+				expected.segment(data.interval_ids[cell_id], data.interval_count[cell_id]) += matrix * q_source;
+
+			}
+
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
+
+
+
 }
