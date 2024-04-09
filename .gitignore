@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Eigen
+/Tests/tfi.txt
+/Tests/incoming.txt
+/Tests/uexp.txt
+/Tests/ures.txt
