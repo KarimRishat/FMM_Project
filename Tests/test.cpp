@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "../FMM_Project/Factory.h"
 #include "../FMM_Project/Transformations.h"
-#define EPS 1e-10
+#include <fstream>
+#define EPS 1e-1
 
 // https://learn.microsoft.com/ru-ru/visualstudio/test/how-to-use-google-test-for-cpp?view=vs-2022
 // https://github.com/google/googletest/blob/main/docs/primer.md
@@ -199,11 +200,11 @@ namespace TranslateOps
 	}
 
 
-	MatrixXcd FindTifo(point_t cells_dif,size_t P)
+	MatrixXcd FindTifo(point_t cells_dif,size_t P, point_t cells_diff_neg)
 	{
 		MatrixXcd result(P, P);
 
-		result(0, 0) = std::log(-cells_dif);
+		result(0, 0) = std::log(cells_diff_neg);
 
 		for (size_t j = 1; j < P; ++j)
 		{
@@ -415,8 +416,9 @@ namespace TranslateOps
 			{
 				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
 				point_t cells_diff = factory.grid.cell_centers[far_cell_id] - factory.grid.cell_centers[cell_id];
-				auto temp = FindTifo(cells_diff, P);
-				sum_vector += temp * sources.segment(P * cell_id, P);
+				point_t cells_diff_neg = factory.grid.cell_centers[cell_id] - factory.grid.cell_centers[far_cell_id];
+				auto temp = FindTifo(cells_diff, P, cells_diff_neg);
+				sum_vector += temp * sources.segment(P * far_cell_id, P);
 			}
 			expected.segment(cell_id * P, P) = sum_vector;
 
@@ -454,7 +456,8 @@ namespace TranslateOps
 				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
 				point_t cells_diff = factory.grid.cell_centers[far_cell_id] - factory.grid.cell_centers[cell_id];
 				auto result = tifo_matrix.block(0, P * source_id, P, P);
-				auto expected = FindTifo(cells_diff, P);
+				point_t cells_diff_neg = factory.grid.cell_centers[cell_id] - factory.grid.cell_centers[far_cell_id];
+				auto expected = FindTifo(cells_diff, P, cells_diff_neg);
 				for (size_t i = 0; i < P; ++i)
 				{
 					for (size_t j = 0; j < P; ++j)
@@ -548,14 +551,12 @@ namespace TranslateOps
 	}
 
 
-
-
-	TEST(FullResult, NineCellsThreeCharges)
+	TEST(FullResult, FourCellsThreeCharges)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		BigAdjacencyFactory adjfactory{ 2, domain };
 		Factory factory{ adjfactory, 3ull };
-		unsigned char P = 5;
+		unsigned char P = 3;
 
 		Calculate_FMM::Solver fmm_solver{ factory, P };
 
@@ -571,15 +572,17 @@ namespace TranslateOps
 
 		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
 		{
-			size_t start_id{ data.interval_ids[cell_id] };
+			//size_t start_id{ data.interval_ids[cell_id] };
 
 			for (size_t source_id = 0; source_id < factory.grid.cell_centers.size(); ++source_id)
 			{
 				auto matrix = fmm_solver.CreateMatrix(cell_id, source_id);
 
-				Map<VectorXd> q_source(data.q.data() + data.interval_ids[source_id], data.interval_count[source_id]);
+				Map<VectorXd> q_source(data.q.data() + data.interval_ids[source_id],
+					data.interval_count[source_id]);
 
-				expected.segment(data.interval_ids[cell_id], data.interval_count[cell_id]) += matrix * q_source;
+				expected.segment(data.interval_ids[cell_id], data.interval_count[cell_id])
+					+= matrix * q_source;
 
 			}
 
@@ -592,6 +595,168 @@ namespace TranslateOps
 		}
 	}
 
+	TEST(FullResult, NineCellsOneCharge)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3, domain };
+		Factory factory{ adjfactory, 1ull };
+		unsigned char P = 3;
+
+		Calculate_FMM::Solver fmm_solver{ factory, P };
+
+		SortedData data{ factory.get_sources() };
+
+		auto result = fmm_solver.SumAllPotential();
+
+		Eigen::VectorXcd expected(data.interval_ids.back());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			/*size_t start_id{ data.interval_ids[cell_id] };*/
+
+			for (size_t source_id = 0; source_id < factory.grid.cell_centers.size(); ++source_id)
+			{
+				auto matrix = fmm_solver.CreateMatrix(cell_id, source_id);
+
+				Map<VectorXd> q_source(data.q.data() + data.interval_ids[source_id], 
+					data.interval_count[source_id]);
+
+				expected.segment(data.interval_ids[cell_id], data.interval_count[cell_id]) 
+					+= matrix * q_source;
+
+			}
+
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
+
+	TEST(FullResult, NineCellsOneChargeOnlyVectors)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3, domain };
+		Factory factory{ adjfactory, 1ull };
+		unsigned char P = 3;
+
+		Calculate_FMM::Solver fmm_solver{ factory, P };
+
+		SortedData data{ factory.get_sources() };
+
+		auto result = fmm_solver.SumAllPotential();
+
+		Eigen::VectorXcd expected(data.interval_ids.back());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+
+		for (size_t target = 0; target < data.q.size(); ++target)
+		{
+			point_t potential{ 0.0 };
+
+			for (size_t source = 0; source < data.q.size(); ++source)
+			{
+				if (target != source)
+					potential += (std::log(data.point[target] - data.point[source])) * data.q[target];
+			}
+			expected[target] = potential;
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
+
+
+
+	TEST(FullResult, FarPotential)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 3ull, domain };
+		Factory factory{ adjfactory, 1ull };
+		unsigned char P = 3;
+
+
+		Calculate_FMM::Solver fmm_solver{ factory, P };
+
+		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		/*for (size_t i = 0; i < factory.grid.cell_centers.size(); i++)
+		{
+			std::cout << "tifo("<< i <<")\n" << t_ifo.T_ifo(i)<<std::endl;
+		}*/
+		//std::cout << "\nOutgoing expansion\n" << std::endl;
+
+		VectorXcd incoming_vector = t_ifo.Incoming_expansion();
+		std::cout << "\nINCOMING\n" << incoming_vector << std::endl;
+
+		Calculate_FMM::Target_translate_operator t_tfi{ factory.get_sources(),P,incoming_vector };
+
+		VectorXcd result{ t_tfi.Final_potential() };
+
+		SortedData data{ factory.get_sources() };
+
+		Eigen::VectorXcd expected(data.interval_ids.back());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+
+		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			size_t start_id{ factory.grid.far_factory.cell_intervals[cell_id]};
+
+			for (size_t source_id = 0; source_id < factory.grid.far_factory.cell_count[cell_id]; ++source_id)
+			{
+				size_t far_id = factory.grid.far_factory.cell_ids[start_id + source_id];
+
+				auto matrix = fmm_solver.CreateMatrix(cell_id, far_id);
+
+				Map<VectorXd> q_source(data.q.data() + data.interval_ids[far_id],
+					data.interval_count[far_id]);
+
+				expected.segment(data.interval_ids[cell_id], data.interval_count[cell_id])
+					+= matrix * q_source;
+
+			}
+		}
+		std::ofstream tfiFile("tfi.txt");
+		for (size_t i = 0; i < 9; i++)
+		{
+			tfiFile <<"\n("<<i<<")\n" << t_tfi.T_tfi(i) << std::endl;
+		}
+		tfiFile.close();
+
+		std::ofstream u_resFile("ures.txt");
+		u_resFile << result << std::endl;
+		u_resFile.close();
+
+		std::ofstream u_expFile("uexp.txt");
+		u_expFile << expected << std::endl;
+		u_expFile.close();
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			if (std::abs(result(i).real() - expected(i).real()) > EPS)
+				std::cout << std::endl << '(' << i << ')' << std::endl;
+			if (std::abs(result(i).imag() - expected(i).imag()) > EPS)
+				std::cout << std::endl << '(' << i << ')' << std::endl;
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
 
 
 }

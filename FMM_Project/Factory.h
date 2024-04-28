@@ -428,7 +428,8 @@ struct Factory
 		q.reserve(count);
 		interval_ids.reserve(grid.m* grid.m + 1ull);
 
-		std::mt19937 gen(rd());
+		/*std::mt19937 gen(rd());*/
+		std::mt19937 gen(1);
 		interval_ids.push_back(0ull);
 		for (size_t j = 0, l =0; j < grid.m; ++j)
 		{

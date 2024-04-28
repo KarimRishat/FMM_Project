@@ -130,7 +130,7 @@ namespace Calculate_FMM
 
 			MatrixXcd T_ifo(P, P);
 
-			T_ifo(0, 0) = std::log(-c_delta);
+			T_ifo(0, 0) = std::log(data.cell_center(target_id) - data.cell_center(source_id));
 
 			T_ifo(0, 1) = (-1.0) / c_delta;
 
@@ -168,8 +168,8 @@ namespace Calculate_FMM
 		Incoming_translate_operator(const Factory &factory, unsigned char P)
 			:Grid_with_data{ &factory }, P{ P }
 		{
-			T_ifo_container = MatrixXcd::Ones(P, 
-				P * P * Grid_with_data->grid.far_factory.cell_intervals.size() + 1);
+			T_ifo_container = MatrixXcd::Zero(P, 
+				P * P * (Grid_with_data->grid.far_factory.cell_intervals.size() + 1));
 			Fill_T_ifo_container();
 		}
 
@@ -205,11 +205,17 @@ namespace Calculate_FMM
 
 				VectorXcd sum_vector = VectorXcd::Zero(P);
 
-				for (size_t far_id = 0; far_id < far_cells_count; ++far_id)
-				{
-					sum_vector += t_ifo.block(0, P * far_id, P, P) * sources.segment(P * cell_id, P);
-				}
+				size_t far_interval = Grid_with_data->grid.far_factory.cell_intervals[cell_id];
 
+				for (size_t local_far_id = 0; local_far_id < far_cells_count; ++local_far_id)
+				{
+					std::cout << "\nsum vector:\n" << sum_vector << std::endl;
+					size_t far_id = Grid_with_data->grid.far_factory.cell_ids[far_interval + local_far_id];
+					/*std::cout << std::endl << "tifo\n" << t_ifo.block(0, P * local_far_id, P, P) << std::endl;
+					std::cout << std::endl << "sources\n" << sources.segment(P * far_id, P) << std::endl;*/
+					sum_vector += t_ifo.block(0, P * local_far_id, P, P) * sources.segment(P * far_id, P);
+				}
+				std::cout << std::endl<<"incoming\n" << sum_vector << std::endl;
 				result.segment(cell_id * P, P) = sum_vector;
 			}
 			return result;
@@ -253,7 +259,7 @@ namespace Calculate_FMM
 
 
 		// Makes the T_ofs operators for all cells in field
-		void Fill_T_ofs_container()
+		void Fill_T_tfi_container()
 		{
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 			{
@@ -267,8 +273,8 @@ namespace Calculate_FMM
 	public:
 		Target_translate_operator(const SortedData& data, unsigned char P, const VectorXcd& v) : data{ data }, P{ P }, incoming_expansion{v}
 		{
-			T_tfi_container = MatrixXcd::Ones(data.interval_ids.back(),P);
-			Fill_T_ofs_container();
+			T_tfi_container = MatrixXcd::Zero(data.interval_ids.back(),P);
+			Fill_T_tfi_container();
 		}
 
 		auto T_tfi(size_t cell_id) const
@@ -284,6 +290,8 @@ namespace Calculate_FMM
 		VectorXcd Final_potential()
 		{
 			VectorXcd result(data.q.size());
+
+			result.setZero();
 
 			for (size_t cell_id = 0; cell_id < data.interval_count.size(); ++cell_id)
 			{
@@ -306,34 +314,10 @@ namespace Calculate_FMM
 
 		unsigned char P;
 
-		/*MatrixXcd CreateMatrix(size_t target_id, size_t source_id)
-		{
-			size_t rows{ data.interval_count[target_id] }, cols{ data.interval_count[source_id] },
-				start_id_target{ data.interval_ids[target_id] }, start_id_source{ data.interval_ids[source_id] };
-
-			MatrixXcd A(rows, cols);
-
-			for (size_t row_id = 0; row_id < rows; ++row_id)
-			{
-				for (size_t col_id = 0; col_id < cols; ++col_id)
-				{
-
-					if (target_id == source_id && col_id == row_id)
-						A(row_id, col_id) = 0;
-					else
-					{
-						auto x = data.point[start_id_target + row_id];
-						auto y = data.point[start_id_source + col_id];
-						A(row_id, col_id) = log(x - y);
-					}
-				}
-			}
-
-		}*/
-
 		VectorXcd FindOwnPotential(size_t cell_id)
 		{
-			Map<VectorXd> q_target(data.q.data() + data.interval_ids[cell_id], data.interval_count[cell_id]);
+			Map<VectorXd> q_target(data.q.data() + data.interval_ids[cell_id],
+				data.interval_count[cell_id]);
 			return CreateMatrix(cell_id, cell_id) * q_target;
 		}
 
@@ -375,7 +359,6 @@ namespace Calculate_FMM
 			{
 				for (size_t col_id = 0; col_id < cols; ++col_id)
 				{
-
 					if (target_id == source_id && col_id == row_id)
 						A(row_id, col_id) = 0;
 					else
@@ -399,7 +382,7 @@ namespace Calculate_FMM
 
 			auto incoming_vector = t_ifo.Incoming_expansion();
 
-			Target_translate_operator t_tfi{ data,P,incoming_vector };
+			Target_translate_operator t_tfi{ data, P, incoming_vector };
 
 			auto farPot = t_tfi.Final_potential();
 
