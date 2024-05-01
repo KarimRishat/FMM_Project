@@ -209,13 +209,13 @@ namespace Calculate_FMM
 
 				for (size_t local_far_id = 0; local_far_id < far_cells_count; ++local_far_id)
 				{
-					std::cout << "\nsum vector:\n" << sum_vector << std::endl;
+					//std::cout << "\nsum vector:\n" << sum_vector << std::endl;
 					size_t far_id = Grid_with_data->grid.far_factory.cell_ids[far_interval + local_far_id];
 					/*std::cout << std::endl << "tifo\n" << t_ifo.block(0, P * local_far_id, P, P) << std::endl;
 					std::cout << std::endl << "sources\n" << sources.segment(P * far_id, P) << std::endl;*/
 					sum_vector += t_ifo.block(0, P * local_far_id, P, P) * sources.segment(P * far_id, P);
 				}
-				std::cout << std::endl<<"incoming\n" << sum_vector << std::endl;
+				//std::cout << std::endl<<"incoming\n" << sum_vector << std::endl;
 				result.segment(cell_id * P, P) = sum_vector;
 			}
 			return result;
