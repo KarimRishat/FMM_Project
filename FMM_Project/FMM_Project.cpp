@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <vector>
+#include <omp.h>
 #include <fstream>
 #include <string>
 #include <chrono>
@@ -10,6 +11,41 @@
 #include "Factory.h"
 #include "Transformations.h"
 using namespace Eigen;
+using point_t = Eigen::dcomplex;
+
+
+void FindPotentialsDirect()
+{
+	double eps{ 1e-1 };
+	Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+	BigAdjacencyFactory adjfactory{ 21, domain };
+	Factory factory{ adjfactory, 22ull };
+	unsigned char P = 3;
+
+	Calculate_FMM::Solver fmm_solver{ factory, P };
+
+	SortedData data{ factory.get_sources() };
+
+	Eigen::VectorXcd expected(data.interval_ids.back());
+
+	expected.setZero();
+
+
+	for (size_t target = 0; target < data.q.size(); ++target)
+	{
+		point_t potential{ 0.0 };
+
+		for (size_t source = 0; source < data.q.size(); ++source)
+		{
+			if (target != source)
+				potential += (std::log(data.point[target] - data.point[source])) * data.q[target];
+		}
+		expected[target] = potential;
+	}
+}
+
+
+
 void FindPotentials(size_t m, size_t nq, unsigned char P)
 {
 	double eps{ 1e-1 };
@@ -41,7 +77,7 @@ void OptimalSplit(unsigned char P)
 		for (size_t k = 1, N = 10, m, nq, real_N; k < 5; k++)
 		{
 			m = static_cast<size_t>(std::pow(N, c));
-			nq = N / m;
+			nq = N / (m*m);
 			real_N = m * m * nq;
 			double t_sum{ 0.0 };				//time sum for avg time
 			for (size_t i = 0; i < r; i++)
@@ -53,7 +89,7 @@ void OptimalSplit(unsigned char P)
 				t_sum += static_cast<double>(duration.count());
 			}
 			t_sum = t_sum / r;
-			outFile << "N: " << N << ", t_sum: " << t_sum << "ms" << std::endl;
+			outFile << "N: " << real_N << ", t_sum: " << t_sum << "ms" << std::endl;
 			N *= 10;
 		}
 		outFile.close(); // Close the file
@@ -64,7 +100,14 @@ void OptimalSplit(unsigned char P)
 
 int main()
 {
-	for (size_t p = 3; p < 5; p++)
+	//auto start_time = std::chrono::high_resolution_clock::now();
+	//FindPotentialsDirect();
+	//auto end_time = std::chrono::high_resolution_clock::now();
+	//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+	//std::cout << "Time for direct: " << duration.count() << "ms" << std::endl;
+
+	for (size_t p = 3; p < 4; p++)
 	{
 		OptimalSplit(p);
 	}

@@ -724,7 +724,45 @@ namespace TranslateOps
 		}
 	}
 
+	TEST(FullResult, twentyOneCellsTwentytwoChargeOnlyVectors)
+	{
+		double eps{ 1e-1 };
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 21, domain };
+		Factory factory{ adjfactory, 22ull };
+		unsigned char P = 3;
 
+		Calculate_FMM::Solver fmm_solver{ factory, P };
+
+		SortedData data{ factory.get_sources() };
+
+		auto result = fmm_solver.SumAllPotential();
+
+		Eigen::VectorXcd expected(data.interval_ids.back());
+
+		expected.setZero();
+
+		EXPECT_EQ(result.size(), expected.size());
+
+
+		for (size_t target = 0; target < data.q.size(); ++target)
+		{
+			point_t potential{ 0.0 };
+
+			for (size_t source = 0; source < data.q.size(); ++source)
+			{
+				if (target != source)
+					potential += (std::log(data.point[target] - data.point[source])) * data.q[target];
+			}
+			expected[target] = potential;
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), eps);
+			//EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
 
 	TEST(FullResult, FarPotential)
 	{

@@ -1,4 +1,3 @@
 N: 10, t_sum: 0ms
-N: 100, t_sum: 0ms
-N: 1000, t_sum: 53ms
-N: 10000, t_sum: 5261ms
+N: 100, t_sum: 7ms
+N: 1000, t_sum: 662ms
