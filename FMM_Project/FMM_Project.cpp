@@ -24,8 +24,8 @@ void FindPotentials(size_t m, size_t nq, unsigned char P)
 
 void OptimalSplit(unsigned char P)
 {
-	double c_step{ 1.0 / 6.0 };				//step for pow
-	for (double c = 0; c < 1; c+=c_step)
+	double c_step{ 1.0 / 3.0 };				//step for pow
+	for (double c = 0; c < 0.5; c+=c_step)
 	{
 		std::string folder = "test_data/";
 		std::string filename = folder + "t_sum_" + std::to_string(c) + ".txt";
@@ -36,9 +36,9 @@ void OptimalSplit(unsigned char P)
 			continue;
 		}
 
-		size_t r{ 10 };						//number of tries
+		size_t r{ 1 };						//number of tries
 		//m - grid size, nq - number of q in cell, real_n - m^2 * nq
-		for (size_t k = 1, N = 10, m, nq, real_N; k < 3; k++)
+		for (size_t k = 1, N = 10, m, nq, real_N; k < 5; k++)
 		{
 			m = static_cast<size_t>(std::pow(N, c));
 			nq = N / m;
@@ -49,11 +49,11 @@ void OptimalSplit(unsigned char P)
 				auto start_time = std::chrono::high_resolution_clock::now();
 				FindPotentials(m, nq, P);
 				auto end_time = std::chrono::high_resolution_clock::now();
-				auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 				t_sum += static_cast<double>(duration.count());
 			}
 			t_sum = t_sum / r;
-			outFile << "N: " << N << ", t_sum: " << t_sum << std::endl;
+			outFile << "N: " << N << ", t_sum: " << t_sum << "ms" << std::endl;
 			N *= 10;
 		}
 		outFile.close(); // Close the file
@@ -68,6 +68,7 @@ int main()
 	{
 		OptimalSplit(p);
 	}
+	return 0;
 }
 
 

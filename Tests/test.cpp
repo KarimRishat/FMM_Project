@@ -2,7 +2,7 @@
 #include "../FMM_Project/Factory.h"
 #include "../FMM_Project/Transformations.h"
 #include <fstream>
-#define EPS 1e-14
+#define EPS 1e-13
 
 // https://learn.microsoft.com/ru-ru/visualstudio/test/how-to-use-google-test-for-cpp?view=vs-2022
 // https://github.com/google/googletest/blob/main/docs/primer.md

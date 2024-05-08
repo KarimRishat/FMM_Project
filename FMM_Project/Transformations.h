@@ -168,8 +168,10 @@ namespace Calculate_FMM
 		Incoming_translate_operator(const Factory &factory, unsigned char P)
 			:Grid_with_data{ &factory }, P{ P }
 		{
-			T_ifo_container = MatrixXcd::Zero(P, 
-				P * P * (Grid_with_data->grid.far_factory.cell_intervals.size() + 1));
+			/*T_ifo_container = MatrixXcd::Zero(P, 
+				P * P * (Grid_with_data->grid.far_factory.cell_intervals.size() + 1));*/
+			T_ifo_container = MatrixXcd::Zero(P,
+				P * (Grid_with_data->grid.far_factory.cell_intervals.back()));
 			Fill_T_ifo_container();
 		}
 
