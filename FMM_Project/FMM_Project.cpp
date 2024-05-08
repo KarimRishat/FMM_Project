@@ -1,65 +1,73 @@
 ﻿#pragma once
 #include <vector>
-
+#include <fstream>
+#include <string>
+#include <chrono>
 #include <iostream>
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
 #include "Factory.h"
 #include "Transformations.h"
+using namespace Eigen;
+void FindPotentials(size_t m, size_t nq, unsigned char P)
+{
+	double eps{ 1e-1 };
+	Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+	BigAdjacencyFactory adjfactory{ m, domain };
+	Factory factory{ adjfactory, nq };
+
+	Calculate_FMM::Solver fmm_solver{ factory, P };
+
+	auto result = fmm_solver.SumAllPotential();
+}
+
+void OptimalSplit(unsigned char P)
+{
+	double c_step{ 1.0 / 6.0 };				//step for pow
+	for (double c = 0; c < 1; c+=c_step)
+	{
+		std::string folder = "test_data/";
+		std::string filename = folder + "t_sum_" + std::to_string(c) + ".txt";
+		std::ofstream outFile(filename); // Open file for writing
+		if (!outFile)
+		{
+			std::cerr << "Error opening file: " << filename << std::endl;
+			continue;
+		}
+
+		size_t r{ 10 };						//number of tries
+		//m - grid size, nq - number of q in cell, real_n - m^2 * nq
+		for (size_t k = 1, N = 10, m, nq, real_N; k < 3; k++)
+		{
+			m = static_cast<size_t>(std::pow(N, c));
+			nq = N / m;
+			real_N = m * m * nq;
+			double t_sum{ 0.0 };				//time sum for avg time
+			for (size_t i = 0; i < r; i++)
+			{
+				auto start_time = std::chrono::high_resolution_clock::now();
+				FindPotentials(m, nq, P);
+				auto end_time = std::chrono::high_resolution_clock::now();
+				auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+				t_sum += static_cast<double>(duration.count());
+			}
+			t_sum = t_sum / r;
+			outFile << "N: " << N << ", t_sum: " << t_sum << std::endl;
+			N *= 10;
+		}
+		outFile.close(); // Close the file
+	}
+}
+
+
 
 int main()
 {
-	//Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-	//AdjacencyFactory adjfactory{2ull, domain};
-
-	//Factory factory{ adjfactory, 2ull };
-
-	//SortedData data{ factory.get_sources() };
-
-	//using namespace Eigen;
-
-	////ArrayXd zrr{ ArrayXd::Zero(10) };
-
-	//using namespace Calculate_FMM;
-
-	//TranslateOperator Translate_op{ data };
-
-	//VectorXcd v{ Translate_op.T_outgoing_from_source_cell(1ull, 3) };
-
-	//std::cout << v;
-
-	//Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-	//AdjacencyFactory adjfactory{ 2ull, domain };
-	//Factory factory{ adjfactory, 2ull };
-
-	//SortedData data{ factory.get_sources() };
-
-	//unsigned char P = 5;
-
-	//Calculate_FMM::TranslateOperator tras_op{ data, P };
-
-	//for (size_t cell_id = 0; cell_id < data.its_cell_center.size(); ++cell_id)
-	//	for (size_t source = 0; source < data.interval_count[cell_id]; ++source)
-	//	{
-	//		// check p == 0
-	//	//	EXPECT_EQ(tras_op.T_ofs(cell_id)(0ull, source), 1.0);
-	//		for (size_t p = 1; p < P; ++P)
-	//			// per sources in a cell
-	//	//		EXPECT_EQ(tras_op.T_ofs(cell_id)(p, source), -1.0 / p * std::pow(data.point[0] - data.cell_center(0), p));
-	//		{
-	//		}
-	//	}
-
-	using namespace Eigen;
-
-	Domain domain{ -1.0, 1.0, -1.0, 1.0 };
-	BigAdjacencyFactory adjfactory{ 1ull, domain };
-	Factory factory{ adjfactory, 1ull };
-	unsigned char P = 2;
-
-	Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
-
+	for (size_t p = 3; p < 5; p++)
+	{
+		OptimalSplit(p);
+	}
 }
 
 

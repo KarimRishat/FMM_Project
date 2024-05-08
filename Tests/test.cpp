@@ -2,7 +2,7 @@
 #include "../FMM_Project/Factory.h"
 #include "../FMM_Project/Transformations.h"
 #include <fstream>
-#define EPS 1e-1
+#define EPS 1e-14
 
 // https://learn.microsoft.com/ru-ru/visualstudio/test/how-to-use-google-test-for-cpp?view=vs-2022
 // https://github.com/google/googletest/blob/main/docs/primer.md
@@ -432,6 +432,51 @@ namespace TranslateOps
 	}
 
 
+	TEST(Tifo, SixteenCellsTwentyFiveChargesMultiply)
+	{
+		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
+		BigAdjacencyFactory adjfactory{ 4ull, domain };
+		Factory factory{ adjfactory, 25ull };
+		unsigned char P = 5;
+
+		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
+
+		auto result = t_ifo.Incoming_expansion();
+
+		Eigen::VectorXcd expected = VectorXcd::Zero(P * factory.grid.cell_centers.size());
+
+		EXPECT_EQ(result.size(), expected.size());
+
+		Calculate_FMM::TranslateOperator tofs{ factory.get_sources(),P };
+
+		auto sources = tofs.Outgoing_expansion();
+
+		for (size_t cell_id = 0, far_cell_id, count_far, start_id;
+			cell_id < factory.grid.cell_centers.size(); ++cell_id)
+		{
+			VectorXcd sum_vector = VectorXcd::Zero(P);
+			count_far = factory.grid.far_factory.cell_count[cell_id];
+			start_id = factory.grid.far_factory.cell_intervals[cell_id];
+			for (size_t source_id = 0; source_id < factory.grid.far_factory.cell_count[cell_id]; ++source_id)
+			{
+				far_cell_id = factory.grid.far_factory.cell_ids[start_id + source_id];
+				point_t cells_diff = factory.grid.cell_centers[far_cell_id] - factory.grid.cell_centers[cell_id];
+				point_t cells_diff_neg = factory.grid.cell_centers[cell_id] - factory.grid.cell_centers[far_cell_id];
+				auto temp = FindTifo(cells_diff, P, cells_diff_neg);
+				sum_vector += temp * sources.segment(P * far_cell_id, P);
+			}
+			expected.segment(cell_id * P, P) = sum_vector;
+
+		}
+
+		for (size_t i = 0; i < result.size(); i++)
+		{
+			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
+		}
+	}
+
+
 	TEST(Tifo, NineCellsThreeCharges)
 	{
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
@@ -597,6 +642,7 @@ namespace TranslateOps
 
 	TEST(FullResult, NineCellsOneCharge)
 	{
+		double eps{ 1e-1 };
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		BigAdjacencyFactory adjfactory{ 3, domain };
 		Factory factory{ adjfactory, 1ull };
@@ -616,7 +662,6 @@ namespace TranslateOps
 
 		for (size_t cell_id = 0; cell_id < factory.grid.cell_centers.size(); ++cell_id)
 		{
-			/*size_t start_id{ data.interval_ids[cell_id] };*/
 
 			for (size_t source_id = 0; source_id < factory.grid.cell_centers.size(); ++source_id)
 			{
@@ -634,13 +679,14 @@ namespace TranslateOps
 
 		for (size_t i = 0; i < result.size(); i++)
 		{
-			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).real(), expected(i).real(), eps);
 			//EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
 		}
 	}
 
 	TEST(FullResult, NineCellsOneChargeOnlyVectors)
 	{
+		double eps{ 1e-1 };
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		BigAdjacencyFactory adjfactory{ 3, domain };
 		Factory factory{ adjfactory, 1ull };
@@ -673,7 +719,7 @@ namespace TranslateOps
 
 		for (size_t i = 0; i < result.size(); i++)
 		{
-			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).real(), expected(i).real(), eps);
 			//EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
 		}
 	}
@@ -682,24 +728,17 @@ namespace TranslateOps
 
 	TEST(FullResult, FarPotential)
 	{
+		double eps{ 1e-10 };
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		BigAdjacencyFactory adjfactory{ 3ull, domain };
 		Factory factory{ adjfactory, 10ull };
 		unsigned char P = 100;
 
-
 		Calculate_FMM::Solver fmm_solver{ factory, P };
 
 		Calculate_FMM::Incoming_translate_operator t_ifo{ factory, P };
 
-		/*for (size_t i = 0; i < factory.grid.cell_centers.size(); i++)
-		{
-			std::cout << "tifo("<< i <<")\n" << t_ifo.T_ifo(i)<<std::endl;
-		}*/
-		//std::cout << "\nOutgoing expansion\n" << std::endl;
-
 		VectorXcd incoming_vector = t_ifo.Incoming_expansion();
-		//std::cout << "\nINCOMING\n" << incoming_vector << std::endl;
 
 		Calculate_FMM::Target_translate_operator t_tfi{ factory.get_sources(),P,incoming_vector };
 
@@ -732,28 +771,10 @@ namespace TranslateOps
 
 			}
 		}
-		std::ofstream tfiFile("tfi.txt");
-		for (size_t i = 0; i < 9; i++)
-		{
-			tfiFile <<"\n("<<i<<")\n" << t_tfi.T_tfi(i) << std::endl;
-		}
-		tfiFile.close();
-
-		std::ofstream u_resFile("ures.txt");
-		u_resFile << result << std::endl;
-		u_resFile.close();
-
-		std::ofstream u_expFile("uexp.txt");
-		u_expFile << expected << std::endl;
-		u_expFile.close();
 
 		for (size_t i = 0; i < result.size(); i++)
 		{
-			if (std::abs(result(i).real() - expected(i).real()) > EPS)
-				std::cout << std::endl << '(' << i << ')' << std::endl;
-			if (std::abs(result(i).imag() - expected(i).imag()) > EPS)
-				std::cout << std::endl << '(' << i << ')' << std::endl;
-			EXPECT_NEAR(result(i).real(), expected(i).real(), EPS);
+			EXPECT_NEAR(result(i).real(), expected(i).real(), eps);
 			//EXPECT_NEAR(result(i).imag(), expected(i).imag(), EPS);
 		}
 	}
