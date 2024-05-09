@@ -61,7 +61,7 @@ void FindPotentials(size_t m, size_t nq, unsigned char P)
 void OptimalSplit(unsigned char P)
 {
 	double c_step{ 1.0 / 3.0 };				//step for pow
-	for (double c = 0; c < 0.5; c+=c_step)
+	for (double c = c_step; c < 0.7; c+=c_step)
 	{
 		std::string folder = "test_data/";
 		std::string filename = folder + "t_sum_" + std::to_string(c) + ".txt";
@@ -74,7 +74,7 @@ void OptimalSplit(unsigned char P)
 
 		size_t r{ 1 };						//number of tries
 		//m - grid size, nq - number of q in cell, real_n - m^2 * nq
-		for (size_t k = 1, N = 10, m, nq, real_N; k < 5; k++)
+		for (size_t k = 1, N = 10, m, nq, real_N; k < 6; k++)
 		{
 			m = static_cast<size_t>(std::pow(N, c));
 			nq = N / (m*m);
@@ -100,14 +100,14 @@ void OptimalSplit(unsigned char P)
 
 int main()
 {
-	//auto start_time = std::chrono::high_resolution_clock::now();
-	//FindPotentialsDirect();
-	//auto end_time = std::chrono::high_resolution_clock::now();
-	//auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+	/*auto start_time = std::chrono::high_resolution_clock::now();
+	FindPotentialsDirect();
+	auto end_time = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-	//std::cout << "Time for direct: " << duration.count() << "ms" << std::endl;
+	std::cout << "Time for direct: " << duration.count() << "ms" << std::endl;*/
 
-	for (size_t p = 3; p < 4; p++)
+	for (size_t p = 5; p < 6; p++)
 	{
 		OptimalSplit(p);
 	}

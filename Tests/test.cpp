@@ -730,7 +730,7 @@ namespace TranslateOps
 		Domain domain{ -1.0, 1.0, -1.0, 1.0 };
 		BigAdjacencyFactory adjfactory{ 21, domain };
 		Factory factory{ adjfactory, 22ull };
-		unsigned char P = 3;
+		unsigned char P = 5;
 
 		Calculate_FMM::Solver fmm_solver{ factory, P };
 

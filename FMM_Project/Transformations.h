@@ -124,13 +124,14 @@ namespace Calculate_FMM
 		// Makes the incoming from outgoing translation operator for cell
 		MatrixXcd Fill_Tifo(size_t target_id, size_t source_id)
 		{
-			SortedData data{ Grid_with_data->get_sources() };
+			const auto& cell_centers = Grid_with_data->grid.cell_centers;
+
 			//(c_sigma - c_tau)
-			point_t c_delta = data.cell_center(source_id) - data.cell_center(target_id);
+			point_t c_delta = cell_centers[source_id] - cell_centers[target_id];
 
 			MatrixXcd T_ifo(P, P);
 
-			T_ifo(0, 0) = std::log(data.cell_center(target_id) - data.cell_center(source_id));
+			T_ifo(0, 0) = std::log(-c_delta/*cell_centers[target_id] - cell_centers[source_id]*/);
 
 			T_ifo(0, 1) = (-1.0) / c_delta;
 
@@ -141,8 +142,6 @@ namespace Calculate_FMM
 			//First 2 rows
 			for (size_t j = 2; j < P; j++)
 			{
-				auto a = T_ifo(1, j - 1);
-				auto b = ((point_t)j / (point_t)(j - 1)) * (-1.0) * (T_ifo(1, j - 1) / c_delta);
 				T_ifo(0, j) = (-1.0) * T_ifo(0, j - 1) / c_delta;
 				T_ifo(1, j) = ((point_t)j / (point_t)(j - 1)) * (-1.0) * T_ifo(1, j - 1) / c_delta;
 			}
@@ -365,9 +364,7 @@ namespace Calculate_FMM
 						A(row_id, col_id) = 0;
 					else
 					{
-						auto x = data.point[start_id_target + row_id];
-						auto y = data.point[start_id_source + col_id];
-						A(row_id, col_id) = log(x - y);
+						A(row_id, col_id) = log(data.point[start_id_target + row_id] - data.point[start_id_source + col_id]);
 					}
 				}
 			}
