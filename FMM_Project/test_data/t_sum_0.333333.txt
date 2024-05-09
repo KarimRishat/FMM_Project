@@ -1,0 +1,5 @@
+N: 8, t_sum: 0ms
+N: 96, t_sum: 0ms
+N: 972, t_sum: 8ms
+N: 9702, t_sum: 224ms
+N: 99452, t_sum: 5053ms
