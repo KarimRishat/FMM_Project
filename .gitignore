@@ -366,3 +366,33 @@ FodyWeavers.xsd
 /Tests/incoming.txt
 /Tests/uexp.txt
 /Tests/ures.txt
+/FMM_Project/Graphs
+/FMM_Project/test_data/ChooseM
+/FMM_Project/test_data/ChooseP
+/FMM_Project/test_data/Error
+/FMM_Project/test_data/test_direct
+/FMM_Project/test_data/m = N^(1_2).txt
+/FMM_Project/test_data/m = N^(1_3).txt
+/FMM_Project/test_data/m = N^(1_4).txt
+/FMM_Project/test_data/m = N^(1_8).txt
+/FMM_Project/test_data/m = N^(2_3).txt
+/FMM_Project/test_data/N^(0.125000) P =6.txt
+/FMM_Project/test_data/N^(0.125000) P =7.txt
+/FMM_Project/test_data/N^(0.125000) P =8.txt
+/FMM_Project/test_data/N^(0.125000) P =9.txt
+/FMM_Project/test_data/N^(0.166667) P =6.txt
+/FMM_Project/test_data/N^(0.166667) P =7.txt
+/FMM_Project/test_data/N^(0.166667) P =8.txt
+/FMM_Project/test_data/N^(0.166667) P =9.txt
+/FMM_Project/test_data/N^(0.250000) P =6.txt
+/FMM_Project/test_data/N^(0.250000) P =7.txt
+/FMM_Project/test_data/N^(0.250000) P =8.txt
+/FMM_Project/test_data/N^(0.250000) P =9.txt
+/FMM_Project/test_data/N^(0.333333) P =6.txt
+/FMM_Project/test_data/N^(0.333333) P =7.txt
+/FMM_Project/test_data/N^(0.333333) P =8.txt
+/FMM_Project/test_data/N^(0.333333) P =9.txt
+/FMM_Project/test_data/N^(0.375000) P =6.txt
+/FMM_Project/test_data/N^(0.375000) P =7.txt
+/FMM_Project/test_data/N^(0.375000) P =8.txt
+/FMM_Project/test_data/N^(0.375000) P =9.txt
